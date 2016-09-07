@@ -21,6 +21,95 @@ define('myproject/app', ['exports', 'ember', 'ember/resolver', 'ember/load-initi
 	exports['default'] = App;
 
 });
+define('myproject/components/auth-manager', ['exports', 'ember'], function (exports, Ember) {
+
+	'use strict';
+
+	exports['default'] = Ember['default'].Component.extend({
+		isLoggedIn: false,
+		username: '',
+		password: '',
+		errorMsg: '',
+		remember: false,
+		userid: -1,
+		actions: {
+			login: function login() {
+				// Do stuff to authenticate here
+				var username = this.get('username');
+				var password = this.get('password');
+				var remember = this.get('remember');
+				var data = {
+					'username': username,
+					'password': password
+				};
+				var controllerObj = this;
+				Ember['default'].$.post('../api/session/', data, function (response) {
+					if (response.isauthenticated) {
+						// Successful login
+						console.log('Login POST Request to ../api/session/ was successful.');
+						controllerObj.set('username', response.username);
+						controllerObj.set('userid', response.userid);
+						controllerObj.set('isLoggedIn', true);
+
+						if (remember) {
+							// Save username and password to local storage
+							localStorage.setItem('remember', true);
+							localStorage.setItem('username', controllerObj.get('username'));
+							localStorage.setItem('password', controllerObj.get('password'));
+						} else {
+							localStorage.removeItem('remember');
+							localStorage.removeItem('username');
+							localStorage.removeItem('password');
+						}
+						controllerObj.set('password', '');
+					} else {
+						// Error handling
+						console.log('Login POST Request to ../api/session/ was unsuccessful.');
+						controllerObj.set('errorMsg', response.message);
+					}
+				});
+			},
+			logout: function logout() {
+				var controllerObj = this;
+				Ember['default'].$.ajax({ url: '../api/session/', type: 'DELETE' }).then(function (response) {
+					console.log('Logout DELETE Request to ../api/session/ was successful:' + response);
+					controllerObj.set('isLoggedIn', false);
+					controllerObj.set('errorMsg', '');
+					controllerObj.set('username', '');
+					controllerObj.set('userid', -1);
+
+					if (localStorage.remember) {
+						controllerObj.set('remember', localStorage.remember);
+						controllerObj.set('username', localStorage.username);
+						controllerObj.set('password', localStorage.password);
+					}
+				});
+			}
+		},
+		init: function init() {
+			this._super();
+			var controllerObj = this;
+			Ember['default'].$.get('../api/session/', function (response) {
+				if (response.isauthenticated) {
+					// Successful login
+					console.log('The user: \'' + response.username + '\' is currently logged in.');
+					controllerObj.set('username', response.username);
+					controllerObj.set('userid', response.userid);
+					controllerObj.set('isLoggedIn', true);
+				} else {
+					// Error handling
+					console.log('The user is not currently logged in.');
+				}
+			});
+			if (localStorage.remember) {
+				this.set('remember', localStorage.remember);
+				this.set('username', localStorage.username);
+				this.set('password', localStorage.password);
+			}
+		}
+	});
+
+});
 define('myproject/components/bs-accordion-item', ['exports', 'ember-bootstrap/components/bs-accordion-item'], function (exports, bs_accordion_item) {
 
 	'use strict';
@@ -1499,11 +1588,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
               "source": null,
               "start": {
                 "line": 9,
-                "column": 3
+                "column": 4
               },
               "end": {
                 "line": 11,
-                "column": 3
+                "column": 4
               }
             },
             "moduleName": "myproject/templates/application.hbs"
@@ -1513,7 +1602,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
           hasRendered: false,
           buildFragment: function buildFragment(dom) {
             var el0 = dom.createDocumentFragment();
-            var el1 = dom.createTextNode("				");
+            var el1 = dom.createTextNode("					");
             dom.appendChild(el0, el1);
             var el1 = dom.createComment("");
             dom.appendChild(el0, el1);
@@ -1527,7 +1616,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
             return morphs;
           },
           statements: [
-            ["inline","bs-input",[],["type","text","value",["subexpr","@mut",[["get","searchField",["loc",[null,[10,33],[10,44]]]]],[],[]],"placeholder","Filter photos"],["loc",[null,[10,4],[10,74]]]]
+            ["inline","bs-input",[],["type","text","value",["subexpr","@mut",[["get","searchField",["loc",[null,[10,34],[10,45]]]]],[],[]],"placeholder","Filter photos"],["loc",[null,[10,5],[10,75]]]]
           ],
           locals: [],
           templates: []
@@ -1544,7 +1633,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
             },
             "end": {
               "line": 16,
-              "column": 2
+              "column": 3
             }
           },
           "moduleName": "myproject/templates/application.hbs"
@@ -1556,22 +1645,22 @@ define('myproject/templates/application', ['exports'], function (exports) {
           var el0 = dom.createDocumentFragment();
           var el1 = dom.createComment("");
           dom.appendChild(el0, el1);
-          var el1 = dom.createTextNode("			");
+          var el1 = dom.createTextNode("				");
           dom.appendChild(el0, el1);
           var el1 = dom.createComment("");
           dom.appendChild(el0, el1);
-          var el1 = dom.createTextNode("\n			");
+          var el1 = dom.createTextNode("\n				");
           dom.appendChild(el0, el1);
           var el1 = dom.createElement("button");
           dom.setAttribute(el1,"type","submit");
           dom.setAttribute(el1,"class","btn btn-default");
-          var el2 = dom.createTextNode("\n				");
+          var el2 = dom.createTextNode("\n					");
           dom.appendChild(el1, el2);
           var el2 = dom.createElement("span");
           dom.setAttribute(el2,"class","glyphicon glyphicon-search");
           dom.setAttribute(el2,"aria-hidden","true");
           dom.appendChild(el1, el2);
-          var el2 = dom.createTextNode("\n			");
+          var el2 = dom.createTextNode("\n				");
           dom.appendChild(el1, el2);
           dom.appendChild(el0, el1);
           var el1 = dom.createTextNode("\n");
@@ -1586,8 +1675,8 @@ define('myproject/templates/application', ['exports'], function (exports) {
           return morphs;
         },
         statements: [
-          ["block","if",[["get","filteredPhotos",["loc",[null,[9,9],[9,23]]]]],[],0,null,["loc",[null,[9,3],[11,10]]]],
-          ["inline","bs-input",[],["type","text","value",["subexpr","@mut",[["get","tagSearchField",["loc",[null,[12,32],[12,46]]]]],[],[]],"action","search","placeholder","Search for a Flickr tag"],["loc",[null,[12,3],[12,102]]]]
+          ["block","if",[["get","filteredPhotos",["loc",[null,[9,10],[9,24]]]]],[],0,null,["loc",[null,[9,4],[11,11]]]],
+          ["inline","bs-input",[],["type","text","value",["subexpr","@mut",[["get","tagSearchField",["loc",[null,[12,33],[12,47]]]]],[],[]],"action","search","placeholder","Search for a Flickr tag"],["loc",[null,[12,4],[12,103]]]]
         ],
         locals: [],
         templates: [child0]
@@ -1602,11 +1691,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
               "loc": {
                 "source": null,
                 "start": {
-                  "line": 41,
+                  "line": 42,
                   "column": 6
                 },
                 "end": {
-                  "line": 43,
+                  "line": 44,
                   "column": 6
                 }
               },
@@ -1638,8 +1727,8 @@ define('myproject/templates/application', ['exports'], function (exports) {
               return morphs;
             },
             statements: [
-              ["element","action",["clicktag",["get","tag",["loc",[null,[42,79],[42,82]]]]],[],["loc",[null,[42,59],[42,84]]]],
-              ["content","tag",["loc",[null,[42,86],[42,93]]]]
+              ["element","action",["clicktag",["get","tag",["loc",[null,[43,79],[43,82]]]]],[],["loc",[null,[43,59],[43,84]]]],
+              ["content","tag",["loc",[null,[43,86],[43,93]]]]
             ],
             locals: ["tag"],
             templates: []
@@ -1651,11 +1740,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
             "loc": {
               "source": null,
               "start": {
-                "line": 23,
+                "line": 24,
                 "column": 3
               },
               "end": {
-                "line": 48,
+                "line": 49,
                 "column": 3
               }
             },
@@ -1786,15 +1875,15 @@ define('myproject/templates/application', ['exports'], function (exports) {
             return morphs;
           },
           statements: [
-            ["inline","light-box",[],["href",["subexpr","@mut",[["get","photo.url",["loc",[null,[27,23],[27,32]]]]],[],[]],"data-lightbox",["subexpr","@mut",[["get","photo.id",["loc",[null,[27,47],[27,55]]]]],[],[]],"data-title",["subexpr","@mut",[["get","photo.title",["loc",[null,[27,67],[27,78]]]]],[],[]],"data-class","media-object feed-img"],["loc",[null,[27,6],[28,43]]]],
-            ["attribute","href",["get","photo.link",["loc",[null,[29,23],[29,33]]]]],
-            ["content","photo.humanReadableDate",["loc",[null,[29,36],[29,63]]]],
-            ["attribute","href",["get","photo.ownerurl",["loc",[null,[30,20],[30,34]]]]],
-            ["content","photo.owner.username",["loc",[null,[30,53],[30,77]]]],
-            ["content","photo.title",["loc",[null,[33,32],[33,47]]]],
-            ["content","photo.views",["loc",[null,[33,49],[33,64]]]],
-            ["content","photo.description",["loc",[null,[34,6],[34,29]]]],
-            ["block","each",[["get","photo.tags",["loc",[null,[41,21],[41,31]]]]],[],0,null,["loc",[null,[41,6],[43,15]]]]
+            ["inline","light-box",[],["href",["subexpr","@mut",[["get","photo.url",["loc",[null,[28,23],[28,32]]]]],[],[]],"data-lightbox",["subexpr","@mut",[["get","photo.id",["loc",[null,[28,47],[28,55]]]]],[],[]],"data-title",["subexpr","@mut",[["get","photo.title",["loc",[null,[28,67],[28,78]]]]],[],[]],"data-class","media-object feed-img"],["loc",[null,[28,6],[29,43]]]],
+            ["attribute","href",["get","photo.link",["loc",[null,[30,23],[30,33]]]]],
+            ["content","photo.humanReadableDate",["loc",[null,[30,36],[30,63]]]],
+            ["attribute","href",["get","photo.ownerurl",["loc",[null,[31,20],[31,34]]]]],
+            ["content","photo.owner.username",["loc",[null,[31,53],[31,77]]]],
+            ["content","photo.title",["loc",[null,[34,32],[34,47]]]],
+            ["content","photo.views",["loc",[null,[34,49],[34,64]]]],
+            ["content","photo.description",["loc",[null,[35,6],[35,29]]]],
+            ["block","each",[["get","photo.tags",["loc",[null,[42,21],[42,31]]]]],[],0,null,["loc",[null,[42,6],[44,15]]]]
           ],
           locals: ["photo"],
           templates: [child0]
@@ -1806,11 +1895,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 21,
+              "line": 22,
               "column": 1
             },
             "end": {
-              "line": 50,
+              "line": 51,
               "column": 1
             }
           },
@@ -1842,7 +1931,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
           return morphs;
         },
         statements: [
-          ["block","each",[["get","filteredPhotos",["loc",[null,[23,20],[23,34]]]]],[],0,null,["loc",[null,[23,3],[48,12]]]]
+          ["block","each",[["get","filteredPhotos",["loc",[null,[24,20],[24,34]]]]],[],0,null,["loc",[null,[24,3],[49,12]]]]
         ],
         locals: [],
         templates: [child0]
@@ -1856,11 +1945,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
             "loc": {
               "source": null,
               "start": {
-                "line": 51,
+                "line": 52,
                 "column": 2
               },
               "end": {
-                "line": 53,
+                "line": 54,
                 "column": 2
               }
             },
@@ -1897,11 +1986,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
               "loc": {
                 "source": null,
                 "start": {
-                  "line": 58,
+                  "line": 59,
                   "column": 4
                 },
                 "end": {
-                  "line": 60,
+                  "line": 61,
                   "column": 4
                 }
               },
@@ -1933,8 +2022,8 @@ define('myproject/templates/application', ['exports'], function (exports) {
               return morphs;
             },
             statements: [
-              ["element","action",["clicktag",["get","tag",["loc",[null,[59,75],[59,78]]]]],[],["loc",[null,[59,55],[59,80]]]],
-              ["content","tag",["loc",[null,[59,82],[59,89]]]]
+              ["element","action",["clicktag",["get","tag",["loc",[null,[60,75],[60,78]]]]],[],["loc",[null,[60,55],[60,80]]]],
+              ["content","tag",["loc",[null,[60,82],[60,89]]]]
             ],
             locals: ["tag"],
             templates: []
@@ -1946,11 +2035,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
             "loc": {
               "source": null,
               "start": {
-                "line": 53,
+                "line": 54,
                 "column": 2
               },
               "end": {
-                "line": 62,
+                "line": 63,
                 "column": 2
               }
             },
@@ -2000,7 +2089,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
             return morphs;
           },
           statements: [
-            ["block","each",[["get","tagList",["loc",[null,[58,19],[58,26]]]]],[],0,null,["loc",[null,[58,4],[60,13]]]]
+            ["block","each",[["get","tagList",["loc",[null,[59,19],[59,26]]]]],[],0,null,["loc",[null,[59,4],[61,13]]]]
           ],
           locals: [],
           templates: [child0]
@@ -2012,11 +2101,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 50,
+              "line": 51,
               "column": 1
             },
             "end": {
-              "line": 63,
+              "line": 64,
               "column": 1
             }
           },
@@ -2039,7 +2128,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
           return morphs;
         },
         statements: [
-          ["block","liquid-if",[["get","loading",["loc",[null,[51,15],[51,22]]]]],["use","toDown"],0,1,["loc",[null,[51,2],[62,16]]]]
+          ["block","liquid-if",[["get","loading",["loc",[null,[52,15],[52,22]]]]],["use","toDown"],0,1,["loc",[null,[52,2],[63,16]]]]
         ],
         locals: [],
         templates: [child0, child1]
@@ -2055,7 +2144,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 64,
+            "line": 65,
             "column": 6
           }
         },
@@ -2099,7 +2188,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
         dom.appendChild(el3, el4);
         var el4 = dom.createComment("");
         dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("		");
+        var el4 = dom.createTextNode("			");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createComment("");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("\n		");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n	");
@@ -2120,17 +2213,375 @@ define('myproject/templates/application', ['exports'], function (exports) {
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var morphs = new Array(2);
-        morphs[0] = dom.createMorphAt(dom.childAt(fragment, [2, 1, 3]),1,1);
-        morphs[1] = dom.createMorphAt(dom.childAt(fragment, [4]),1,1);
+        var element9 = dom.childAt(fragment, [2, 1, 3]);
+        var morphs = new Array(3);
+        morphs[0] = dom.createMorphAt(element9,1,1);
+        morphs[1] = dom.createMorphAt(element9,3,3);
+        morphs[2] = dom.createMorphAt(dom.childAt(fragment, [4]),1,1);
         return morphs;
       },
       statements: [
-        ["block","bs-form",[],["formLayout","inline","action","search"],0,null,["loc",[null,[8,3],[16,14]]]],
-        ["block","liquid-if",[["get","filteredPhotosLoaded",["loc",[null,[21,14],[21,34]]]]],["use","toDown"],1,2,["loc",[null,[21,1],[63,15]]]]
+        ["block","bs-form",[],["formLayout","inline","class","search-form","action","search"],0,null,["loc",[null,[8,3],[16,15]]]],
+        ["content","auth-manager",["loc",[null,[17,3],[17,19]]]],
+        ["block","liquid-if",[["get","filteredPhotosLoaded",["loc",[null,[22,14],[22,34]]]]],["use","toDown"],1,2,["loc",[null,[22,1],[64,15]]]]
       ],
       locals: [],
       templates: [child0, child1, child2]
+    };
+  }()));
+
+});
+define('myproject/templates/components/auth-manager', ['exports'], function (exports) {
+
+  'use strict';
+
+  exports['default'] = Ember.HTMLBars.template((function() {
+    var child0 = (function() {
+      return {
+        meta: {
+          "revision": "Ember@1.13.12",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 1,
+              "column": 0
+            },
+            "end": {
+              "line": 6,
+              "column": 0
+            }
+          },
+          "moduleName": "myproject/templates/components/auth-manager.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode(" ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n	");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("p");
+          dom.setAttribute(el1,"class","auth-form");
+          var el2 = dom.createTextNode("\n		Hello ");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n		");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createElement("button");
+          dom.setAttribute(el2,"type","button");
+          dom.setAttribute(el2,"class","btn btn-default");
+          var el3 = dom.createTextNode("Log out");
+          dom.appendChild(el2, el3);
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n	");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var element5 = dom.childAt(fragment, [2]);
+          var element6 = dom.childAt(element5, [3]);
+          var morphs = new Array(2);
+          morphs[0] = dom.createMorphAt(element5,1,1);
+          morphs[1] = dom.createElementMorph(element6);
+          return morphs;
+        },
+        statements: [
+          ["content","username",["loc",[null,[3,8],[3,20]]]],
+          ["element","action",["logout"],[],["loc",[null,[4,48],[4,67]]]]
+        ],
+        locals: [],
+        templates: []
+      };
+    }());
+    var child1 = (function() {
+      var child0 = (function() {
+        return {
+          meta: {
+            "revision": "Ember@1.13.12",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 7,
+                "column": 1
+              },
+              "end": {
+                "line": 23,
+                "column": 1
+              }
+            },
+            "moduleName": "myproject/templates/components/auth-manager.hbs"
+          },
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("		");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createElement("form");
+            dom.setAttribute(el1,"class","form-inline auth-form");
+            var el2 = dom.createTextNode("\n\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("div");
+            dom.setAttribute(el2,"class","form-group has-error");
+            var el3 = dom.createTextNode("\n				");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createElement("label");
+            dom.setAttribute(el3,"class","control-label");
+            var el4 = dom.createElement("div");
+            dom.setAttribute(el4,"class","alert alert-danger");
+            dom.setAttribute(el4,"style","padding: 5px; margin-bottom: 0px;");
+            dom.setAttribute(el4,"role","alert");
+            var el5 = dom.createComment("");
+            dom.appendChild(el4, el5);
+            dom.appendChild(el3, el4);
+            dom.appendChild(el2, el3);
+            var el3 = dom.createTextNode("\n				");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createComment("");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createTextNode("\n			");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("div");
+            dom.setAttribute(el2,"class","form-group has-error");
+            var el3 = dom.createTextNode("\n				");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createComment("");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createTextNode("\n			");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("label");
+            dom.setAttribute(el2,"class","checkbox");
+            var el3 = dom.createTextNode("\n				");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createComment("");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createTextNode(" Remember me\n			");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("button");
+            dom.setAttribute(el2,"type","button");
+            dom.setAttribute(el2,"class","btn btn-default");
+            var el3 = dom.createTextNode("Login");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n\n		");
+            dom.appendChild(el1, el2);
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var element2 = dom.childAt(fragment, [1]);
+            var element3 = dom.childAt(element2, [1]);
+            var element4 = dom.childAt(element2, [7]);
+            var morphs = new Array(5);
+            morphs[0] = dom.createMorphAt(dom.childAt(element3, [1, 0]),0,0);
+            morphs[1] = dom.createMorphAt(element3,3,3);
+            morphs[2] = dom.createMorphAt(dom.childAt(element2, [3]),1,1);
+            morphs[3] = dom.createMorphAt(dom.childAt(element2, [5]),1,1);
+            morphs[4] = dom.createElementMorph(element4);
+            return morphs;
+          },
+          statements: [
+            ["content","errorMsg",["loc",[null,[11,120],[11,132]]]],
+            ["inline","input",[],["class","form-control auth-user-field","value",["subexpr","@mut",[["get","username",["loc",[null,[12,55],[12,63]]]]],[],[]],"placeholder","Username","enter","login"],["loc",[null,[12,4],[12,103]]]],
+            ["inline","input",[],["class","form-control auth-user-field","value",["subexpr","@mut",[["get","password",["loc",[null,[15,55],[15,63]]]]],[],[]],"placeholder","Password","type","password","enter","login"],["loc",[null,[15,4],[15,119]]]],
+            ["inline","input",[],["type","checkbox","checked",["subexpr","@mut",[["get","remember",["loc",[null,[18,36],[18,44]]]]],[],[]]],["loc",[null,[18,4],[18,46]]]],
+            ["element","action",["login"],[],["loc",[null,[20,49],[20,67]]]]
+          ],
+          locals: [],
+          templates: []
+        };
+      }());
+      var child1 = (function() {
+        return {
+          meta: {
+            "revision": "Ember@1.13.12",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 23,
+                "column": 1
+              },
+              "end": {
+                "line": 38,
+                "column": 1
+              }
+            },
+            "moduleName": "myproject/templates/components/auth-manager.hbs"
+          },
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("		");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createElement("form");
+            dom.setAttribute(el1,"class","form-inline auth-form");
+            var el2 = dom.createTextNode("\n\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("div");
+            dom.setAttribute(el2,"class","form-group");
+            var el3 = dom.createTextNode("\n				");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createComment("");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createTextNode("\n			");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("div");
+            dom.setAttribute(el2,"class","form-group");
+            var el3 = dom.createTextNode("\n				");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createComment("");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createTextNode("\n			");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("label");
+            dom.setAttribute(el2,"class","checkbox");
+            var el3 = dom.createTextNode("\n				");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createComment("");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createTextNode(" Remember me\n			");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("button");
+            dom.setAttribute(el2,"type","button");
+            dom.setAttribute(el2,"class","btn btn-default");
+            var el3 = dom.createTextNode("Login");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n			\n		");
+            dom.appendChild(el1, el2);
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var element0 = dom.childAt(fragment, [1]);
+            var element1 = dom.childAt(element0, [7]);
+            var morphs = new Array(4);
+            morphs[0] = dom.createMorphAt(dom.childAt(element0, [1]),1,1);
+            morphs[1] = dom.createMorphAt(dom.childAt(element0, [3]),1,1);
+            morphs[2] = dom.createMorphAt(dom.childAt(element0, [5]),1,1);
+            morphs[3] = dom.createElementMorph(element1);
+            return morphs;
+          },
+          statements: [
+            ["inline","input",[],["class","form-control auth-user-field","value",["subexpr","@mut",[["get","username",["loc",[null,[27,55],[27,63]]]]],[],[]],"placeholder","Username","enter","login"],["loc",[null,[27,4],[27,103]]]],
+            ["inline","input",[],["class","form-control auth-user-field","value",["subexpr","@mut",[["get","password",["loc",[null,[30,55],[30,63]]]]],[],[]],"placeholder","Password","type","password","enter","login"],["loc",[null,[30,4],[30,119]]]],
+            ["inline","input",[],["type","checkbox","checked",["subexpr","@mut",[["get","remember",["loc",[null,[33,36],[33,44]]]]],[],[]]],["loc",[null,[33,4],[33,46]]]],
+            ["element","action",["login"],[],["loc",[null,[35,49],[35,67]]]]
+          ],
+          locals: [],
+          templates: []
+        };
+      }());
+      return {
+        meta: {
+          "revision": "Ember@1.13.12",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 6,
+              "column": 0
+            },
+            "end": {
+              "line": 39,
+              "column": 0
+            }
+          },
+          "moduleName": "myproject/templates/components/auth-manager.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode(" ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createComment("");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(fragment,2,2,contextualElement);
+          dom.insertBoundary(fragment, null);
+          return morphs;
+        },
+        statements: [
+          ["block","if",[["get","errorMsg",["loc",[null,[7,7],[7,15]]]]],[],0,1,["loc",[null,[7,1],[38,8]]]]
+        ],
+        locals: [],
+        templates: [child0, child1]
+      };
+    }());
+    return {
+      meta: {
+        "revision": "Ember@1.13.12",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 39,
+            "column": 7
+          }
+        },
+        "moduleName": "myproject/templates/components/auth-manager.hbs"
+      },
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var morphs = new Array(1);
+        morphs[0] = dom.createMorphAt(fragment,0,0,contextualElement);
+        dom.insertBoundary(fragment, 0);
+        dom.insertBoundary(fragment, null);
+        return morphs;
+      },
+      statements: [
+        ["block","if",[["get","isLoggedIn",["loc",[null,[1,6],[1,16]]]]],[],0,1,["loc",[null,[1,0],[39,7]]]]
+      ],
+      locals: [],
+      templates: [child0, child1]
     };
   }()));
 
@@ -7725,6 +8176,16 @@ define('myproject/tests/app.jshint', function () {
   });
 
 });
+define('myproject/tests/components/auth-manager.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - components');
+  test('components/auth-manager.js should pass jshint', function() { 
+    ok(true, 'components/auth-manager.js should pass jshint.'); 
+  });
+
+});
 define('myproject/tests/controllers/application.jshint', function () {
 
   'use strict';
@@ -7836,6 +8297,39 @@ define('myproject/tests/transforms/object.jshint', function () {
   module('JSHint - transforms');
   test('transforms/object.js should pass jshint', function() { 
     ok(true, 'transforms/object.js should pass jshint.'); 
+  });
+
+});
+define('myproject/tests/unit/components/auth-manager-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleForComponent('auth-manager', 'Unit | Component | auth manager', {
+    // Specify the other units that are required for this test
+    // needs: ['component:foo', 'helper:bar'],
+    unit: true
+  });
+
+  ember_qunit.test('it renders', function (assert) {
+    assert.expect(2);
+
+    // Creates the component instance
+    var component = this.subject();
+    assert.equal(component._state, 'preRender');
+
+    // Renders the component to the page
+    this.render();
+    assert.equal(component._state, 'inDOM');
+  });
+
+});
+define('myproject/tests/unit/components/auth-manager-test.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - unit/components');
+  test('unit/components/auth-manager-test.js should pass jshint', function() { 
+    ok(true, 'unit/components/auth-manager-test.js should pass jshint.'); 
   });
 
 });

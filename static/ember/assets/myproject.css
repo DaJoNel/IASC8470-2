@@ -2,6 +2,18 @@ body {
 	padding-top: 70px;
 }
 
+.auth-form {
+	margin-top: -34px;
+}
+
+.auth-user-field {
+	width: 150px !important;
+}
+
+.search-form {
+	margin-left: -250px;
+}
+
 .search-field {
 	padding-top: 8px;
 	padding-right: 10px;
