@@ -1058,6 +1058,25 @@ define('myproject/controllers/application', ['exports', 'ember'], function (expo
 			});
 		}).property('photos.@each', 'searchField'),
 		actions: {
+			like: function like(photo) {
+				var title = photo.get('title');
+				if (title.length >= 97) {
+					title = title.substring(0, 96) + "...";
+				}
+				var photodata = {
+					'user': this.get('userid'),
+					'title': title,
+					'objid': photo.get('id'),
+					'farm': photo.get('farm'),
+					'secret': photo.get('secret'),
+					'server': photo.get('server')
+				};
+				Ember['default'].$.post('../api/likes/', photodata, function (response) {
+					photo.set('liked', true);
+					console.log('Request to add like for photo: ' + photo.get('title') + ' returned the following response');
+					console.log(response);
+				});
+			},
 			search: function search() {
 				this.set('loading', true);
 				this.get('photos').content.clear();
@@ -1616,7 +1635,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
             return morphs;
           },
           statements: [
-            ["inline","bs-input",[],["type","text","value",["subexpr","@mut",[["get","searchField",["loc",[null,[10,34],[10,45]]]]],[],[]],"placeholder","Filter photos"],["loc",[null,[10,5],[10,75]]]]
+            ["inline","bs-input",[],["type","text","value",["subexpr","@mut",[["get","searchField",["loc",[null,[10,34],[10,45]]]]],[],[]],"placeholder","filter photos"],["loc",[null,[10,5],[10,75]]]]
           ],
           locals: [],
           templates: []
@@ -1676,7 +1695,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
         },
         statements: [
           ["block","if",[["get","filteredPhotos",["loc",[null,[9,10],[9,24]]]]],[],0,null,["loc",[null,[9,4],[11,11]]]],
-          ["inline","bs-input",[],["type","text","value",["subexpr","@mut",[["get","tagSearchField",["loc",[null,[12,33],[12,47]]]]],[],[]],"action","search","placeholder","Search for a Flickr tag"],["loc",[null,[12,4],[12,103]]]]
+          ["inline","bs-input",[],["type","text","value",["subexpr","@mut",[["get","tagSearchField",["loc",[null,[12,33],[12,47]]]]],[],[]],"action","search","placeholder","search for a flickr tag"],["loc",[null,[12,4],[12,103]]]]
         ],
         locals: [],
         templates: [child0]
@@ -1691,11 +1710,109 @@ define('myproject/templates/application', ['exports'], function (exports) {
               "loc": {
                 "source": null,
                 "start": {
-                  "line": 42,
+                  "line": 36,
+                  "column": 6
+                },
+                "end": {
+                  "line": 40,
+                  "column": 6
+                }
+              },
+              "moduleName": "myproject/templates/application.hbs"
+            },
+            arity: 0,
+            cachedFragment: null,
+            hasRendered: false,
+            buildFragment: function buildFragment(dom) {
+              var el0 = dom.createDocumentFragment();
+              var el1 = dom.createTextNode("							");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createElement("button");
+              dom.setAttribute(el1,"class","btn btn-warning btn-xs pull-right");
+              dom.setAttribute(el1,"disabled","disabled");
+              var el2 = dom.createTextNode("\n								");
+              dom.appendChild(el1, el2);
+              var el2 = dom.createElement("span");
+              dom.setAttribute(el2,"class","glyphicon glyphicon-thumbs-up");
+              dom.appendChild(el1, el2);
+              var el2 = dom.createTextNode(" Like\n							");
+              dom.appendChild(el1, el2);
+              dom.appendChild(el0, el1);
+              var el1 = dom.createTextNode("\n");
+              dom.appendChild(el0, el1);
+              return el0;
+            },
+            buildRenderNodes: function buildRenderNodes() { return []; },
+            statements: [
+
+            ],
+            locals: [],
+            templates: []
+          };
+        }());
+        var child1 = (function() {
+          return {
+            meta: {
+              "revision": "Ember@1.13.12",
+              "loc": {
+                "source": null,
+                "start": {
+                  "line": 40,
                   "column": 6
                 },
                 "end": {
                   "line": 44,
+                  "column": 6
+                }
+              },
+              "moduleName": "myproject/templates/application.hbs"
+            },
+            arity: 0,
+            cachedFragment: null,
+            hasRendered: false,
+            buildFragment: function buildFragment(dom) {
+              var el0 = dom.createDocumentFragment();
+              var el1 = dom.createTextNode("							");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createElement("button");
+              dom.setAttribute(el1,"class","btn btn-default btn-xs pull-right");
+              var el2 = dom.createTextNode("\n								");
+              dom.appendChild(el1, el2);
+              var el2 = dom.createElement("span");
+              dom.setAttribute(el2,"class","glyphicon glyphicon-thumbs-up");
+              dom.appendChild(el1, el2);
+              var el2 = dom.createTextNode(" Like\n							");
+              dom.appendChild(el1, el2);
+              dom.appendChild(el0, el1);
+              var el1 = dom.createTextNode("\n");
+              dom.appendChild(el0, el1);
+              return el0;
+            },
+            buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+              var element2 = dom.childAt(fragment, [1]);
+              var morphs = new Array(1);
+              morphs[0] = dom.createElementMorph(element2);
+              return morphs;
+            },
+            statements: [
+              ["element","action",["like",["get","photo",["loc",[null,[41,73],[41,78]]]]],[],["loc",[null,[41,57],[41,80]]]]
+            ],
+            locals: [],
+            templates: []
+          };
+        }());
+        var child2 = (function() {
+          return {
+            meta: {
+              "revision": "Ember@1.13.12",
+              "loc": {
+                "source": null,
+                "start": {
+                  "line": 53,
+                  "column": 6
+                },
+                "end": {
+                  "line": 55,
                   "column": 6
                 }
               },
@@ -1727,8 +1844,8 @@ define('myproject/templates/application', ['exports'], function (exports) {
               return morphs;
             },
             statements: [
-              ["element","action",["clicktag",["get","tag",["loc",[null,[43,79],[43,82]]]]],[],["loc",[null,[43,59],[43,84]]]],
-              ["content","tag",["loc",[null,[43,86],[43,93]]]]
+              ["element","action",["clicktag",["get","tag",["loc",[null,[54,79],[54,82]]]]],[],["loc",[null,[54,59],[54,84]]]],
+              ["content","tag",["loc",[null,[54,86],[54,93]]]]
             ],
             locals: ["tag"],
             templates: []
@@ -1740,11 +1857,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
             "loc": {
               "source": null,
               "start": {
-                "line": 24,
+                "line": 25,
                 "column": 3
               },
               "end": {
-                "line": 49,
+                "line": 60,
                 "column": 3
               }
             },
@@ -1805,7 +1922,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
             dom.appendChild(el4, el5);
             var el5 = dom.createComment("");
             dom.appendChild(el4, el5);
-            var el5 = dom.createTextNode(" Views)");
+            var el5 = dom.createTextNode(" Views)\n");
+            dom.appendChild(el4, el5);
+            var el5 = dom.createComment("");
+            dom.appendChild(el4, el5);
+            var el5 = dom.createTextNode("						");
             dom.appendChild(el4, el5);
             dom.appendChild(el3, el4);
             var el4 = dom.createTextNode("\n						");
@@ -1855,38 +1976,40 @@ define('myproject/templates/application', ['exports'], function (exports) {
             return el0;
           },
           buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-            var element2 = dom.childAt(fragment, [1]);
-            var element3 = dom.childAt(element2, [1]);
+            var element3 = dom.childAt(fragment, [1]);
             var element4 = dom.childAt(element3, [1]);
-            var element5 = dom.childAt(element4, [3]);
-            var element6 = dom.childAt(element4, [5]);
-            var element7 = dom.childAt(element3, [3]);
-            var element8 = dom.childAt(element7, [1]);
-            var morphs = new Array(9);
-            morphs[0] = dom.createMorphAt(element4,1,1);
-            morphs[1] = dom.createAttrMorph(element5, 'href');
-            morphs[2] = dom.createMorphAt(element5,0,0);
-            morphs[3] = dom.createAttrMorph(element6, 'href');
-            morphs[4] = dom.createMorphAt(element6,0,0);
-            morphs[5] = dom.createMorphAt(element8,0,0);
-            morphs[6] = dom.createMorphAt(element8,2,2);
-            morphs[7] = dom.createUnsafeMorphAt(element7,3,3);
-            morphs[8] = dom.createMorphAt(dom.childAt(element2, [5, 3]),1,1);
+            var element5 = dom.childAt(element4, [1]);
+            var element6 = dom.childAt(element5, [3]);
+            var element7 = dom.childAt(element5, [5]);
+            var element8 = dom.childAt(element4, [3]);
+            var element9 = dom.childAt(element8, [1]);
+            var morphs = new Array(10);
+            morphs[0] = dom.createMorphAt(element5,1,1);
+            morphs[1] = dom.createAttrMorph(element6, 'href');
+            morphs[2] = dom.createMorphAt(element6,0,0);
+            morphs[3] = dom.createAttrMorph(element7, 'href');
+            morphs[4] = dom.createMorphAt(element7,0,0);
+            morphs[5] = dom.createMorphAt(element9,0,0);
+            morphs[6] = dom.createMorphAt(element9,2,2);
+            morphs[7] = dom.createMorphAt(element9,4,4);
+            morphs[8] = dom.createUnsafeMorphAt(element8,3,3);
+            morphs[9] = dom.createMorphAt(dom.childAt(element3, [5, 3]),1,1);
             return morphs;
           },
           statements: [
-            ["inline","light-box",[],["href",["subexpr","@mut",[["get","photo.url",["loc",[null,[28,23],[28,32]]]]],[],[]],"data-lightbox",["subexpr","@mut",[["get","photo.id",["loc",[null,[28,47],[28,55]]]]],[],[]],"data-title",["subexpr","@mut",[["get","photo.title",["loc",[null,[28,67],[28,78]]]]],[],[]],"data-class","media-object feed-img"],["loc",[null,[28,6],[29,43]]]],
-            ["attribute","href",["get","photo.link",["loc",[null,[30,23],[30,33]]]]],
-            ["content","photo.humanReadableDate",["loc",[null,[30,36],[30,63]]]],
-            ["attribute","href",["get","photo.ownerurl",["loc",[null,[31,20],[31,34]]]]],
-            ["content","photo.owner.username",["loc",[null,[31,53],[31,77]]]],
-            ["content","photo.title",["loc",[null,[34,32],[34,47]]]],
-            ["content","photo.views",["loc",[null,[34,49],[34,64]]]],
-            ["content","photo.description",["loc",[null,[35,6],[35,29]]]],
-            ["block","each",[["get","photo.tags",["loc",[null,[42,21],[42,31]]]]],[],0,null,["loc",[null,[42,6],[44,15]]]]
+            ["inline","light-box",[],["href",["subexpr","@mut",[["get","photo.url",["loc",[null,[29,23],[29,32]]]]],[],[]],"data-lightbox",["subexpr","@mut",[["get","photo.id",["loc",[null,[29,47],[29,55]]]]],[],[]],"data-title",["subexpr","@mut",[["get","photo.title",["loc",[null,[29,67],[29,78]]]]],[],[]],"data-class","media-object feed-img"],["loc",[null,[29,6],[30,43]]]],
+            ["attribute","href",["get","photo.link",["loc",[null,[31,23],[31,33]]]]],
+            ["content","photo.humanReadableDate",["loc",[null,[31,36],[31,63]]]],
+            ["attribute","href",["get","photo.ownerurl",["loc",[null,[32,20],[32,34]]]]],
+            ["content","photo.owner.username",["loc",[null,[32,53],[32,77]]]],
+            ["content","photo.title",["loc",[null,[35,32],[35,47]]]],
+            ["content","photo.views",["loc",[null,[35,49],[35,64]]]],
+            ["block","if",[["get","photo.liked",["loc",[null,[36,12],[36,23]]]]],[],0,1,["loc",[null,[36,6],[44,13]]]],
+            ["content","photo.description",["loc",[null,[46,6],[46,29]]]],
+            ["block","each",[["get","photo.tags",["loc",[null,[53,21],[53,31]]]]],[],2,null,["loc",[null,[53,6],[55,15]]]]
           ],
           locals: ["photo"],
-          templates: [child0]
+          templates: [child0, child1, child2]
         };
       }());
       return {
@@ -1895,11 +2018,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 22,
+              "line": 23,
               "column": 1
             },
             "end": {
-              "line": 51,
+              "line": 62,
               "column": 1
             }
           },
@@ -1931,7 +2054,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
           return morphs;
         },
         statements: [
-          ["block","each",[["get","filteredPhotos",["loc",[null,[24,20],[24,34]]]]],[],0,null,["loc",[null,[24,3],[49,12]]]]
+          ["block","each",[["get","filteredPhotos",["loc",[null,[25,20],[25,34]]]]],[],0,null,["loc",[null,[25,3],[60,12]]]]
         ],
         locals: [],
         templates: [child0]
@@ -1945,11 +2068,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
             "loc": {
               "source": null,
               "start": {
-                "line": 52,
+                "line": 63,
                 "column": 2
               },
               "end": {
-                "line": 54,
+                "line": 65,
                 "column": 2
               }
             },
@@ -1986,11 +2109,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
               "loc": {
                 "source": null,
                 "start": {
-                  "line": 59,
+                  "line": 70,
                   "column": 4
                 },
                 "end": {
-                  "line": 61,
+                  "line": 72,
                   "column": 4
                 }
               },
@@ -2022,8 +2145,8 @@ define('myproject/templates/application', ['exports'], function (exports) {
               return morphs;
             },
             statements: [
-              ["element","action",["clicktag",["get","tag",["loc",[null,[60,75],[60,78]]]]],[],["loc",[null,[60,55],[60,80]]]],
-              ["content","tag",["loc",[null,[60,82],[60,89]]]]
+              ["element","action",["clicktag",["get","tag",["loc",[null,[71,75],[71,78]]]]],[],["loc",[null,[71,55],[71,80]]]],
+              ["content","tag",["loc",[null,[71,82],[71,89]]]]
             ],
             locals: ["tag"],
             templates: []
@@ -2035,11 +2158,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
             "loc": {
               "source": null,
               "start": {
-                "line": 54,
+                "line": 65,
                 "column": 2
               },
               "end": {
-                "line": 63,
+                "line": 74,
                 "column": 2
               }
             },
@@ -2057,7 +2180,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
             var el2 = dom.createTextNode("\n				");
             dom.appendChild(el1, el2);
             var el2 = dom.createElement("h1");
-            var el3 = dom.createTextNode("IASC 8470 Lab 1");
+            var el3 = dom.createTextNode("IASC 8470 Lab 2");
             dom.appendChild(el2, el3);
             dom.appendChild(el1, el2);
             var el2 = dom.createTextNode("\n				");
@@ -2089,7 +2212,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
             return morphs;
           },
           statements: [
-            ["block","each",[["get","tagList",["loc",[null,[59,19],[59,26]]]]],[],0,null,["loc",[null,[59,4],[61,13]]]]
+            ["block","each",[["get","tagList",["loc",[null,[70,19],[70,26]]]]],[],0,null,["loc",[null,[70,4],[72,13]]]]
           ],
           locals: [],
           templates: [child0]
@@ -2101,11 +2224,11 @@ define('myproject/templates/application', ['exports'], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 51,
+              "line": 62,
               "column": 1
             },
             "end": {
-              "line": 64,
+              "line": 75,
               "column": 1
             }
           },
@@ -2128,7 +2251,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
           return morphs;
         },
         statements: [
-          ["block","liquid-if",[["get","loading",["loc",[null,[52,15],[52,22]]]]],["use","toDown"],0,1,["loc",[null,[52,2],[63,16]]]]
+          ["block","liquid-if",[["get","loading",["loc",[null,[63,15],[63,22]]]]],["use","toDown"],0,1,["loc",[null,[63,2],[74,16]]]]
         ],
         locals: [],
         templates: [child0, child1]
@@ -2144,7 +2267,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 65,
+            "line": 76,
             "column": 6
           }
         },
@@ -2174,7 +2297,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
         var el4 = dom.createElement("a");
         dom.setAttribute(el4,"class","navbar-brand");
         dom.setAttribute(el4,"href","#");
-        var el5 = dom.createTextNode("Flickr App");
+        var el5 = dom.createTextNode("Flickr App 2.0");
         dom.appendChild(el4, el5);
         dom.appendChild(el3, el4);
         var el4 = dom.createTextNode("\n		");
@@ -2192,7 +2315,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
         dom.appendChild(el3, el4);
         var el4 = dom.createComment("");
         dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n		");
+        var el4 = dom.createTextNode("\n\n		");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n	");
@@ -2213,17 +2336,17 @@ define('myproject/templates/application', ['exports'], function (exports) {
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var element9 = dom.childAt(fragment, [2, 1, 3]);
+        var element10 = dom.childAt(fragment, [2, 1, 3]);
         var morphs = new Array(3);
-        morphs[0] = dom.createMorphAt(element9,1,1);
-        morphs[1] = dom.createMorphAt(element9,3,3);
+        morphs[0] = dom.createMorphAt(element10,1,1);
+        morphs[1] = dom.createMorphAt(element10,3,3);
         morphs[2] = dom.createMorphAt(dom.childAt(fragment, [4]),1,1);
         return morphs;
       },
       statements: [
         ["block","bs-form",[],["formLayout","inline","class","search-form","action","search"],0,null,["loc",[null,[8,3],[16,15]]]],
-        ["content","auth-manager",["loc",[null,[17,3],[17,19]]]],
-        ["block","liquid-if",[["get","filteredPhotosLoaded",["loc",[null,[22,14],[22,34]]]]],["use","toDown"],1,2,["loc",[null,[22,1],[64,15]]]]
+        ["inline","auth-manager",[],["class","auth-mgr","userid",["subexpr","@mut",[["get","userid",["loc",[null,[17,42],[17,48]]]]],[],[]]],["loc",[null,[17,3],[17,50]]]],
+        ["block","liquid-if",[["get","filteredPhotosLoaded",["loc",[null,[23,14],[23,34]]]]],["use","toDown"],1,2,["loc",[null,[23,1],[75,15]]]]
       ],
       locals: [],
       templates: [child0, child1, child2]

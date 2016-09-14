@@ -2,21 +2,30 @@ body {
 	padding-top: 70px;
 }
 
-.auth-form {
-	margin-top: -34px;
-}
-
-.auth-user-field {
-	width: 150px !important;
+.navbar-brand {
+	position: absolute;
+	width: 100%;
+	text-align: center;
+	margin: 0 auto;
+	z-index: -1;
 }
 
 .search-form {
-	margin-left: -250px;
+	float: left;
 }
 
 .search-field {
 	padding-top: 8px;
 	padding-right: 10px;
+	width: 100%;
+}
+
+.auth-mgr {
+	float: right;
+}
+
+.auth-user-field {
+	width: 150px !important;
 }
 
 .feed-img {
