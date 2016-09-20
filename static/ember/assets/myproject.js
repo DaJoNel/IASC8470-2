@@ -1070,6 +1070,7 @@ define('myproject/controllers/home', ['exports', 'ember'], function (exports, Em
 	});
 
 	exports['default'] = Ember['default'].Controller.extend({
+		applicationController: Ember['default'].inject.controller('application'),
 		photos: PhotoCollection.create(),
 		searchField: '',
 		tagSearchField: '',
@@ -1093,16 +1094,17 @@ define('myproject/controllers/home', ['exports', 'ember'], function (exports, Em
 					title = title.substring(0, 96) + "...";
 				}
 				var photodata = {
-					'user': this.get('userid'),
+					'user': this.get('applicationController').get('userid'),
 					'title': title,
 					'objid': photo.get('id'),
 					'farm': photo.get('farm'),
 					'secret': photo.get('secret'),
 					'server': photo.get('server')
 				};
+				console.log(photodata);
 				Ember['default'].$.post('../api/likes/', photodata, function (response) {
 					photo.set('liked', true);
-					console.log('Request to add like for photo: ' + photo.get('title') + ' returned the following response');
+					console.log('Request to add like for photo: ' + photo.get('title') + ' returned the following response:');
 					console.log(response);
 				});
 			},
@@ -1115,11 +1117,15 @@ define('myproject/controllers/home', ['exports', 'ember'], function (exports, Em
 			getPhotos: function getPhotos(tag) {
 				var apiKey = '60e5e96ee3938f6098c823357dc12ede';
 				var host = 'https://api.flickr.com/services/rest/';
-				var method = "flickr.tags.getClusterPhotos";
-				var requestURL = host + "?method=" + method + "&api_key=" + apiKey + "&tag=" + tag + "&format=json&nojsoncallback=1";
+				var method = "flickr.photos.search";
+				var requestURL = host + "?method=" + method + "&api_key=" + apiKey + "&tags=" + tag + "&per_page=50&format=json&nojsoncallback=1";
 				var photos = this.get('photos');
 				var t = this;
 				Ember['default'].$.getJSON(requestURL, function (data) {
+					if (!data.photos) {
+						console.log("Could not load photos. Check your API key.");
+						return;
+					}
 					// Callback for successfully completed requests
 					// Make secondary requests to get all of the photo information
 					data.photos.photo.map(function (photoitem) {
@@ -1165,7 +1171,7 @@ define('myproject/controllers/home', ['exports', 'ember'], function (exports, Em
 			var requestURL = host + "?method=" + method + "&api_key=" + apiKey + "&count=75&format=json&nojsoncallback=1";
 			var t = this;
 			Ember['default'].$.getJSON(requestURL, function (data) {
-				//callback for successfully completed requests
+				// Callback for successfully completed requests
 				console.log(data);
 				data.hottags.tag.map(function (tag) {
 					t.get('tagList').pushObject(tag._content);
@@ -1897,7 +1903,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 30,
+            "line": 29,
             "column": 6
           }
         },
@@ -1945,7 +1951,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
         dom.appendChild(el3, el4);
         var el4 = dom.createComment("");
         dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n\n		");
+        var el4 = dom.createTextNode("\n		");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n	");
@@ -1978,7 +1984,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
       statements: [
         ["block","if",[["get","isHome",["loc",[null,[8,9],[8,15]]]]],[],0,1,["loc",[null,[8,3],[22,10]]]],
         ["inline","auth-manager",[],["class","auth-mgr","userid",["subexpr","@mut",[["get","userid",["loc",[null,[23,42],[23,48]]]]],[],[]]],["loc",[null,[23,3],[23,50]]]],
-        ["content","outlet",["loc",[null,[29,1],[29,11]]]]
+        ["content","outlet",["loc",[null,[28,1],[28,11]]]]
       ],
       locals: [],
       templates: [child0, child1]
