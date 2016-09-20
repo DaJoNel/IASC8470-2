@@ -447,6 +447,17 @@ define('myproject/components/light-box', ['exports', 'ember-cli-lightbox/compone
 	exports.default = light_box.default;
 
 });
+define('myproject/components/like-item', ['exports', 'ember'], function (exports, Ember) {
+
+	'use strict';
+
+	exports['default'] = Ember['default'].Component.extend({
+		url: Ember['default'].computed('like.farm', 'like.server', 'like.id', 'like.secret', function () {
+			return "https://farm" + this.get('like').farm + ".staticflickr.com/" + this.get('like').server + "/" + this.get('like').objid + "_" + this.get('like').secret + "_b.jpg";
+		})
+	});
+
+});
 define('myproject/components/liquid-bind', ['exports', 'ember'], function (exports, Ember) {
 
   'use strict';
@@ -1034,6 +1045,24 @@ define('myproject/controllers/application', ['exports', 'ember'], function (expo
 
 	'use strict';
 
+	exports['default'] = Ember['default'].Controller.extend({
+		isHome: (function () {
+			return this.get('currentRouteName') === 'home';
+		}).property('currentRouteName')
+	});
+
+});
+define('myproject/controllers/array', ['exports', 'ember'], function (exports, Ember) {
+
+	'use strict';
+
+	exports['default'] = Ember['default'].Controller;
+
+});
+define('myproject/controllers/home', ['exports', 'ember'], function (exports, Ember) {
+
+	'use strict';
+
 	var PhotoCollection = Ember['default'].ArrayProxy.extend(Ember['default'].SortableMixin, {
 		sortProperties: ['dates.taken'],
 		sortAscending: false,
@@ -1146,18 +1175,18 @@ define('myproject/controllers/application', ['exports', 'ember'], function (expo
 	});
 
 });
-define('myproject/controllers/array', ['exports', 'ember'], function (exports, Ember) {
+define('myproject/controllers/object', ['exports', 'ember'], function (exports, Ember) {
 
 	'use strict';
 
 	exports['default'] = Ember['default'].Controller;
 
 });
-define('myproject/controllers/object', ['exports', 'ember'], function (exports, Ember) {
+define('myproject/controllers/profile', ['exports', 'ember'], function (exports, Ember) {
 
 	'use strict';
 
-	exports['default'] = Ember['default'].Controller;
+	exports['default'] = Ember['default'].Controller.extend({});
 
 });
 define('myproject/helpers/bs-contains', ['exports', 'ember-bootstrap/helpers/bs-contains'], function (exports, bs_contains) {
@@ -1568,15 +1597,47 @@ define('myproject/models/photo', ['exports', 'ember-data'], function (exports, D
 });
 define('myproject/router', ['exports', 'ember', 'myproject/config/environment'], function (exports, Ember, config) {
 
-  'use strict';
+	'use strict';
 
-  var Router = Ember['default'].Router.extend({
-    location: config['default'].locationType
-  });
+	var Router = Ember['default'].Router.extend({
+		location: config['default'].locationType
+	});
 
-  Router.map(function () {});
+	Router.map(function () {
+		this.route('profile', { path: "profile/:userid" });
+		this.route('home');
+	});
 
-  exports['default'] = Router;
+	exports['default'] = Router;
+
+});
+define('myproject/routes/home', ['exports', 'ember'], function (exports, Ember) {
+
+	'use strict';
+
+	exports['default'] = Ember['default'].Route.extend({});
+
+});
+define('myproject/routes/profile', ['exports', 'ember'], function (exports, Ember) {
+
+	'use strict';
+
+	exports['default'] = Ember['default'].Route.extend({
+		setupController: function setupController(controller, model) {
+			var url = '../api/userprofiles/' + model.userid + '/';
+			Ember['default'].$.get(url, function (response) {
+				if (!response.detail) {
+					// Success
+					controller.set('likes', response.likes);
+					console.log('Loading user profile');
+				} else {
+					// Error handling
+					console.log('Error loading user profile.');
+				}
+				console.log(response);
+			});
+		}
+	});
 
 });
 define('myproject/services/liquid-fire-modals', ['exports', 'liquid-fire/modals'], function (exports, Modals) {
@@ -1600,6 +1661,48 @@ define('myproject/templates/application', ['exports'], function (exports) {
   exports['default'] = Ember.HTMLBars.template((function() {
     var child0 = (function() {
       var child0 = (function() {
+        var child0 = (function() {
+          return {
+            meta: {
+              "revision": "Ember@1.13.12",
+              "loc": {
+                "source": null,
+                "start": {
+                  "line": 10,
+                  "column": 5
+                },
+                "end": {
+                  "line": 12,
+                  "column": 5
+                }
+              },
+              "moduleName": "myproject/templates/application.hbs"
+            },
+            arity: 0,
+            cachedFragment: null,
+            hasRendered: false,
+            buildFragment: function buildFragment(dom) {
+              var el0 = dom.createDocumentFragment();
+              var el1 = dom.createTextNode("						");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createComment("");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createTextNode("\n");
+              dom.appendChild(el0, el1);
+              return el0;
+            },
+            buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+              var morphs = new Array(1);
+              morphs[0] = dom.createMorphAt(fragment,1,1,contextualElement);
+              return morphs;
+            },
+            statements: [
+              ["inline","bs-input",[],["type","text","value",["subexpr","@mut",[["get","searchField",["loc",[null,[11,35],[11,46]]]]],[],[]],"placeholder","Filter photos"],["loc",[null,[11,6],[11,76]]]]
+            ],
+            locals: [],
+            templates: []
+          };
+        }());
         return {
           meta: {
             "revision": "Ember@1.13.12",
@@ -1610,7 +1713,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
                 "column": 4
               },
               "end": {
-                "line": 11,
+                "line": 17,
                 "column": 4
               }
             },
@@ -1621,24 +1724,43 @@ define('myproject/templates/application', ['exports'], function (exports) {
           hasRendered: false,
           buildFragment: function buildFragment(dom) {
             var el0 = dom.createDocumentFragment();
+            var el1 = dom.createComment("");
+            dom.appendChild(el0, el1);
             var el1 = dom.createTextNode("					");
             dom.appendChild(el0, el1);
             var el1 = dom.createComment("");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n					");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createElement("button");
+            dom.setAttribute(el1,"type","submit");
+            dom.setAttribute(el1,"class","btn btn-default");
+            var el2 = dom.createTextNode("\n						");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("span");
+            dom.setAttribute(el2,"class","glyphicon glyphicon-search");
+            dom.setAttribute(el2,"aria-hidden","true");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n					");
+            dom.appendChild(el1, el2);
             dom.appendChild(el0, el1);
             var el1 = dom.createTextNode("\n");
             dom.appendChild(el0, el1);
             return el0;
           },
           buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-            var morphs = new Array(1);
-            morphs[0] = dom.createMorphAt(fragment,1,1,contextualElement);
+            var morphs = new Array(2);
+            morphs[0] = dom.createMorphAt(fragment,0,0,contextualElement);
+            morphs[1] = dom.createMorphAt(fragment,2,2,contextualElement);
+            dom.insertBoundary(fragment, 0);
             return morphs;
           },
           statements: [
-            ["inline","bs-input",[],["type","text","value",["subexpr","@mut",[["get","searchField",["loc",[null,[10,34],[10,45]]]]],[],[]],"placeholder","filter photos"],["loc",[null,[10,5],[10,75]]]]
+            ["block","if",[["get","filteredPhotos",["loc",[null,[10,11],[10,25]]]]],[],0,null,["loc",[null,[10,5],[12,12]]]],
+            ["inline","bs-input",[],["type","text","value",["subexpr","@mut",[["get","tagSearchField",["loc",[null,[13,34],[13,48]]]]],[],[]],"action","search","placeholder","Search for a Flickr tag"],["loc",[null,[13,5],[13,104]]]]
           ],
           locals: [],
-          templates: []
+          templates: [child0]
         };
       }());
       return {
@@ -1651,585 +1773,8 @@ define('myproject/templates/application', ['exports'], function (exports) {
               "column": 3
             },
             "end": {
-              "line": 16,
+              "line": 18,
               "column": 3
-            }
-          },
-          "moduleName": "myproject/templates/application.hbs"
-        },
-        arity: 0,
-        cachedFragment: null,
-        hasRendered: false,
-        buildFragment: function buildFragment(dom) {
-          var el0 = dom.createDocumentFragment();
-          var el1 = dom.createComment("");
-          dom.appendChild(el0, el1);
-          var el1 = dom.createTextNode("				");
-          dom.appendChild(el0, el1);
-          var el1 = dom.createComment("");
-          dom.appendChild(el0, el1);
-          var el1 = dom.createTextNode("\n				");
-          dom.appendChild(el0, el1);
-          var el1 = dom.createElement("button");
-          dom.setAttribute(el1,"type","submit");
-          dom.setAttribute(el1,"class","btn btn-default");
-          var el2 = dom.createTextNode("\n					");
-          dom.appendChild(el1, el2);
-          var el2 = dom.createElement("span");
-          dom.setAttribute(el2,"class","glyphicon glyphicon-search");
-          dom.setAttribute(el2,"aria-hidden","true");
-          dom.appendChild(el1, el2);
-          var el2 = dom.createTextNode("\n				");
-          dom.appendChild(el1, el2);
-          dom.appendChild(el0, el1);
-          var el1 = dom.createTextNode("\n");
-          dom.appendChild(el0, el1);
-          return el0;
-        },
-        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-          var morphs = new Array(2);
-          morphs[0] = dom.createMorphAt(fragment,0,0,contextualElement);
-          morphs[1] = dom.createMorphAt(fragment,2,2,contextualElement);
-          dom.insertBoundary(fragment, 0);
-          return morphs;
-        },
-        statements: [
-          ["block","if",[["get","filteredPhotos",["loc",[null,[9,10],[9,24]]]]],[],0,null,["loc",[null,[9,4],[11,11]]]],
-          ["inline","bs-input",[],["type","text","value",["subexpr","@mut",[["get","tagSearchField",["loc",[null,[12,33],[12,47]]]]],[],[]],"action","search","placeholder","search for a flickr tag"],["loc",[null,[12,4],[12,103]]]]
-        ],
-        locals: [],
-        templates: [child0]
-      };
-    }());
-    var child1 = (function() {
-      var child0 = (function() {
-        var child0 = (function() {
-          return {
-            meta: {
-              "revision": "Ember@1.13.12",
-              "loc": {
-                "source": null,
-                "start": {
-                  "line": 36,
-                  "column": 6
-                },
-                "end": {
-                  "line": 40,
-                  "column": 6
-                }
-              },
-              "moduleName": "myproject/templates/application.hbs"
-            },
-            arity: 0,
-            cachedFragment: null,
-            hasRendered: false,
-            buildFragment: function buildFragment(dom) {
-              var el0 = dom.createDocumentFragment();
-              var el1 = dom.createTextNode("							");
-              dom.appendChild(el0, el1);
-              var el1 = dom.createElement("button");
-              dom.setAttribute(el1,"class","btn btn-warning btn-xs pull-right");
-              dom.setAttribute(el1,"disabled","disabled");
-              var el2 = dom.createTextNode("\n								");
-              dom.appendChild(el1, el2);
-              var el2 = dom.createElement("span");
-              dom.setAttribute(el2,"class","glyphicon glyphicon-thumbs-up");
-              dom.appendChild(el1, el2);
-              var el2 = dom.createTextNode(" Like\n							");
-              dom.appendChild(el1, el2);
-              dom.appendChild(el0, el1);
-              var el1 = dom.createTextNode("\n");
-              dom.appendChild(el0, el1);
-              return el0;
-            },
-            buildRenderNodes: function buildRenderNodes() { return []; },
-            statements: [
-
-            ],
-            locals: [],
-            templates: []
-          };
-        }());
-        var child1 = (function() {
-          return {
-            meta: {
-              "revision": "Ember@1.13.12",
-              "loc": {
-                "source": null,
-                "start": {
-                  "line": 40,
-                  "column": 6
-                },
-                "end": {
-                  "line": 44,
-                  "column": 6
-                }
-              },
-              "moduleName": "myproject/templates/application.hbs"
-            },
-            arity: 0,
-            cachedFragment: null,
-            hasRendered: false,
-            buildFragment: function buildFragment(dom) {
-              var el0 = dom.createDocumentFragment();
-              var el1 = dom.createTextNode("							");
-              dom.appendChild(el0, el1);
-              var el1 = dom.createElement("button");
-              dom.setAttribute(el1,"class","btn btn-default btn-xs pull-right");
-              var el2 = dom.createTextNode("\n								");
-              dom.appendChild(el1, el2);
-              var el2 = dom.createElement("span");
-              dom.setAttribute(el2,"class","glyphicon glyphicon-thumbs-up");
-              dom.appendChild(el1, el2);
-              var el2 = dom.createTextNode(" Like\n							");
-              dom.appendChild(el1, el2);
-              dom.appendChild(el0, el1);
-              var el1 = dom.createTextNode("\n");
-              dom.appendChild(el0, el1);
-              return el0;
-            },
-            buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-              var element2 = dom.childAt(fragment, [1]);
-              var morphs = new Array(1);
-              morphs[0] = dom.createElementMorph(element2);
-              return morphs;
-            },
-            statements: [
-              ["element","action",["like",["get","photo",["loc",[null,[41,73],[41,78]]]]],[],["loc",[null,[41,57],[41,80]]]]
-            ],
-            locals: [],
-            templates: []
-          };
-        }());
-        var child2 = (function() {
-          return {
-            meta: {
-              "revision": "Ember@1.13.12",
-              "loc": {
-                "source": null,
-                "start": {
-                  "line": 53,
-                  "column": 6
-                },
-                "end": {
-                  "line": 55,
-                  "column": 6
-                }
-              },
-              "moduleName": "myproject/templates/application.hbs"
-            },
-            arity: 1,
-            cachedFragment: null,
-            hasRendered: false,
-            buildFragment: function buildFragment(dom) {
-              var el0 = dom.createDocumentFragment();
-              var el1 = dom.createTextNode("							");
-              dom.appendChild(el0, el1);
-              var el1 = dom.createElement("button");
-              dom.setAttribute(el1,"class","btn btn-info btn-xs post-tag-button");
-              var el2 = dom.createTextNode("#");
-              dom.appendChild(el1, el2);
-              var el2 = dom.createComment("");
-              dom.appendChild(el1, el2);
-              dom.appendChild(el0, el1);
-              var el1 = dom.createTextNode("\n");
-              dom.appendChild(el0, el1);
-              return el0;
-            },
-            buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-              var element1 = dom.childAt(fragment, [1]);
-              var morphs = new Array(2);
-              morphs[0] = dom.createElementMorph(element1);
-              morphs[1] = dom.createMorphAt(element1,1,1);
-              return morphs;
-            },
-            statements: [
-              ["element","action",["clicktag",["get","tag",["loc",[null,[54,79],[54,82]]]]],[],["loc",[null,[54,59],[54,84]]]],
-              ["content","tag",["loc",[null,[54,86],[54,93]]]]
-            ],
-            locals: ["tag"],
-            templates: []
-          };
-        }());
-        return {
-          meta: {
-            "revision": "Ember@1.13.12",
-            "loc": {
-              "source": null,
-              "start": {
-                "line": 25,
-                "column": 3
-              },
-              "end": {
-                "line": 60,
-                "column": 3
-              }
-            },
-            "moduleName": "myproject/templates/application.hbs"
-          },
-          arity: 1,
-          cachedFragment: null,
-          hasRendered: false,
-          buildFragment: function buildFragment(dom) {
-            var el0 = dom.createDocumentFragment();
-            var el1 = dom.createTextNode("			");
-            dom.appendChild(el0, el1);
-            var el1 = dom.createElement("li");
-            dom.setAttribute(el1,"class","list-group-item");
-            var el2 = dom.createTextNode("\n				");
-            dom.appendChild(el1, el2);
-            var el2 = dom.createElement("div");
-            dom.setAttribute(el2,"class","media");
-            var el3 = dom.createTextNode("\n					");
-            dom.appendChild(el2, el3);
-            var el3 = dom.createElement("div");
-            dom.setAttribute(el3,"class","media-left media-middle");
-            var el4 = dom.createTextNode("\n						");
-            dom.appendChild(el3, el4);
-            var el4 = dom.createComment("");
-            dom.appendChild(el3, el4);
-            var el4 = dom.createTextNode("\n						Taken: ");
-            dom.appendChild(el3, el4);
-            var el4 = dom.createElement("a");
-            var el5 = dom.createComment("");
-            dom.appendChild(el4, el5);
-            var el5 = dom.createElement("br");
-            dom.appendChild(el4, el5);
-            dom.appendChild(el3, el4);
-            var el4 = dom.createTextNode("\n						By: ");
-            dom.appendChild(el3, el4);
-            var el4 = dom.createElement("a");
-            dom.setAttribute(el4,"target","_blank");
-            var el5 = dom.createComment("");
-            dom.appendChild(el4, el5);
-            dom.appendChild(el3, el4);
-            var el4 = dom.createElement("br");
-            dom.appendChild(el3, el4);
-            var el4 = dom.createTextNode("\n					");
-            dom.appendChild(el3, el4);
-            dom.appendChild(el2, el3);
-            var el3 = dom.createTextNode("\n					");
-            dom.appendChild(el2, el3);
-            var el3 = dom.createElement("div");
-            dom.setAttribute(el3,"class","media-body");
-            var el4 = dom.createTextNode("\n						");
-            dom.appendChild(el3, el4);
-            var el4 = dom.createElement("h4");
-            dom.setAttribute(el4,"class","media-heading");
-            var el5 = dom.createComment("");
-            dom.appendChild(el4, el5);
-            var el5 = dom.createTextNode(" (");
-            dom.appendChild(el4, el5);
-            var el5 = dom.createComment("");
-            dom.appendChild(el4, el5);
-            var el5 = dom.createTextNode(" Views)\n");
-            dom.appendChild(el4, el5);
-            var el5 = dom.createComment("");
-            dom.appendChild(el4, el5);
-            var el5 = dom.createTextNode("						");
-            dom.appendChild(el4, el5);
-            dom.appendChild(el3, el4);
-            var el4 = dom.createTextNode("\n						");
-            dom.appendChild(el3, el4);
-            var el4 = dom.createComment("");
-            dom.appendChild(el3, el4);
-            var el4 = dom.createTextNode("\n					");
-            dom.appendChild(el3, el4);
-            dom.appendChild(el2, el3);
-            var el3 = dom.createTextNode("\n				");
-            dom.appendChild(el2, el3);
-            dom.appendChild(el1, el2);
-            var el2 = dom.createTextNode("\n				");
-            dom.appendChild(el1, el2);
-            var el2 = dom.createElement("br");
-            dom.appendChild(el1, el2);
-            var el2 = dom.createTextNode("\n				");
-            dom.appendChild(el1, el2);
-            var el2 = dom.createElement("div");
-            dom.setAttribute(el2,"class","row");
-            var el3 = dom.createTextNode("\n					");
-            dom.appendChild(el2, el3);
-            var el3 = dom.createElement("div");
-            dom.setAttribute(el3,"class","col-md-1 col-xs-1 col-sm-1");
-            var el4 = dom.createTextNode("Tags:");
-            dom.appendChild(el3, el4);
-            dom.appendChild(el2, el3);
-            var el3 = dom.createTextNode("\n					");
-            dom.appendChild(el2, el3);
-            var el3 = dom.createElement("div");
-            dom.setAttribute(el3,"class","col-md-11 col-xs-11 col-sm-11");
-            var el4 = dom.createTextNode("\n");
-            dom.appendChild(el3, el4);
-            var el4 = dom.createComment("");
-            dom.appendChild(el3, el4);
-            var el4 = dom.createTextNode("					");
-            dom.appendChild(el3, el4);
-            dom.appendChild(el2, el3);
-            var el3 = dom.createTextNode("\n				");
-            dom.appendChild(el2, el3);
-            dom.appendChild(el1, el2);
-            var el2 = dom.createTextNode("\n\n			");
-            dom.appendChild(el1, el2);
-            dom.appendChild(el0, el1);
-            var el1 = dom.createTextNode("\n");
-            dom.appendChild(el0, el1);
-            return el0;
-          },
-          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-            var element3 = dom.childAt(fragment, [1]);
-            var element4 = dom.childAt(element3, [1]);
-            var element5 = dom.childAt(element4, [1]);
-            var element6 = dom.childAt(element5, [3]);
-            var element7 = dom.childAt(element5, [5]);
-            var element8 = dom.childAt(element4, [3]);
-            var element9 = dom.childAt(element8, [1]);
-            var morphs = new Array(10);
-            morphs[0] = dom.createMorphAt(element5,1,1);
-            morphs[1] = dom.createAttrMorph(element6, 'href');
-            morphs[2] = dom.createMorphAt(element6,0,0);
-            morphs[3] = dom.createAttrMorph(element7, 'href');
-            morphs[4] = dom.createMorphAt(element7,0,0);
-            morphs[5] = dom.createMorphAt(element9,0,0);
-            morphs[6] = dom.createMorphAt(element9,2,2);
-            morphs[7] = dom.createMorphAt(element9,4,4);
-            morphs[8] = dom.createUnsafeMorphAt(element8,3,3);
-            morphs[9] = dom.createMorphAt(dom.childAt(element3, [5, 3]),1,1);
-            return morphs;
-          },
-          statements: [
-            ["inline","light-box",[],["href",["subexpr","@mut",[["get","photo.url",["loc",[null,[29,23],[29,32]]]]],[],[]],"data-lightbox",["subexpr","@mut",[["get","photo.id",["loc",[null,[29,47],[29,55]]]]],[],[]],"data-title",["subexpr","@mut",[["get","photo.title",["loc",[null,[29,67],[29,78]]]]],[],[]],"data-class","media-object feed-img"],["loc",[null,[29,6],[30,43]]]],
-            ["attribute","href",["get","photo.link",["loc",[null,[31,23],[31,33]]]]],
-            ["content","photo.humanReadableDate",["loc",[null,[31,36],[31,63]]]],
-            ["attribute","href",["get","photo.ownerurl",["loc",[null,[32,20],[32,34]]]]],
-            ["content","photo.owner.username",["loc",[null,[32,53],[32,77]]]],
-            ["content","photo.title",["loc",[null,[35,32],[35,47]]]],
-            ["content","photo.views",["loc",[null,[35,49],[35,64]]]],
-            ["block","if",[["get","photo.liked",["loc",[null,[36,12],[36,23]]]]],[],0,1,["loc",[null,[36,6],[44,13]]]],
-            ["content","photo.description",["loc",[null,[46,6],[46,29]]]],
-            ["block","each",[["get","photo.tags",["loc",[null,[53,21],[53,31]]]]],[],2,null,["loc",[null,[53,6],[55,15]]]]
-          ],
-          locals: ["photo"],
-          templates: [child0, child1, child2]
-        };
-      }());
-      return {
-        meta: {
-          "revision": "Ember@1.13.12",
-          "loc": {
-            "source": null,
-            "start": {
-              "line": 23,
-              "column": 1
-            },
-            "end": {
-              "line": 62,
-              "column": 1
-            }
-          },
-          "moduleName": "myproject/templates/application.hbs"
-        },
-        arity: 0,
-        cachedFragment: null,
-        hasRendered: false,
-        buildFragment: function buildFragment(dom) {
-          var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("		");
-          dom.appendChild(el0, el1);
-          var el1 = dom.createElement("ul");
-          dom.setAttribute(el1,"class","list-group");
-          var el2 = dom.createTextNode("\n");
-          dom.appendChild(el1, el2);
-          var el2 = dom.createComment("");
-          dom.appendChild(el1, el2);
-          var el2 = dom.createTextNode("		");
-          dom.appendChild(el1, el2);
-          dom.appendChild(el0, el1);
-          var el1 = dom.createTextNode("\n");
-          dom.appendChild(el0, el1);
-          return el0;
-        },
-        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-          var morphs = new Array(1);
-          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),1,1);
-          return morphs;
-        },
-        statements: [
-          ["block","each",[["get","filteredPhotos",["loc",[null,[25,20],[25,34]]]]],[],0,null,["loc",[null,[25,3],[60,12]]]]
-        ],
-        locals: [],
-        templates: [child0]
-      };
-    }());
-    var child2 = (function() {
-      var child0 = (function() {
-        return {
-          meta: {
-            "revision": "Ember@1.13.12",
-            "loc": {
-              "source": null,
-              "start": {
-                "line": 63,
-                "column": 2
-              },
-              "end": {
-                "line": 65,
-                "column": 2
-              }
-            },
-            "moduleName": "myproject/templates/application.hbs"
-          },
-          arity: 0,
-          cachedFragment: null,
-          hasRendered: false,
-          buildFragment: function buildFragment(dom) {
-            var el0 = dom.createDocumentFragment();
-            var el1 = dom.createTextNode("			");
-            dom.appendChild(el0, el1);
-            var el1 = dom.createElement("img");
-            dom.setAttribute(el1,"src","loading.gif");
-            dom.setAttribute(el1,"class","img-responsive center-block");
-            dom.appendChild(el0, el1);
-            var el1 = dom.createTextNode("\n");
-            dom.appendChild(el0, el1);
-            return el0;
-          },
-          buildRenderNodes: function buildRenderNodes() { return []; },
-          statements: [
-
-          ],
-          locals: [],
-          templates: []
-        };
-      }());
-      var child1 = (function() {
-        var child0 = (function() {
-          return {
-            meta: {
-              "revision": "Ember@1.13.12",
-              "loc": {
-                "source": null,
-                "start": {
-                  "line": 70,
-                  "column": 4
-                },
-                "end": {
-                  "line": 72,
-                  "column": 4
-                }
-              },
-              "moduleName": "myproject/templates/application.hbs"
-            },
-            arity: 1,
-            cachedFragment: null,
-            hasRendered: false,
-            buildFragment: function buildFragment(dom) {
-              var el0 = dom.createDocumentFragment();
-              var el1 = dom.createTextNode("					");
-              dom.appendChild(el0, el1);
-              var el1 = dom.createElement("button");
-              dom.setAttribute(el1,"class","btn btn-info btn-small tag-button");
-              var el2 = dom.createTextNode("#");
-              dom.appendChild(el1, el2);
-              var el2 = dom.createComment("");
-              dom.appendChild(el1, el2);
-              dom.appendChild(el0, el1);
-              var el1 = dom.createTextNode("\n");
-              dom.appendChild(el0, el1);
-              return el0;
-            },
-            buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-              var element0 = dom.childAt(fragment, [1]);
-              var morphs = new Array(2);
-              morphs[0] = dom.createElementMorph(element0);
-              morphs[1] = dom.createMorphAt(element0,1,1);
-              return morphs;
-            },
-            statements: [
-              ["element","action",["clicktag",["get","tag",["loc",[null,[71,75],[71,78]]]]],[],["loc",[null,[71,55],[71,80]]]],
-              ["content","tag",["loc",[null,[71,82],[71,89]]]]
-            ],
-            locals: ["tag"],
-            templates: []
-          };
-        }());
-        return {
-          meta: {
-            "revision": "Ember@1.13.12",
-            "loc": {
-              "source": null,
-              "start": {
-                "line": 65,
-                "column": 2
-              },
-              "end": {
-                "line": 74,
-                "column": 2
-              }
-            },
-            "moduleName": "myproject/templates/application.hbs"
-          },
-          arity: 0,
-          cachedFragment: null,
-          hasRendered: false,
-          buildFragment: function buildFragment(dom) {
-            var el0 = dom.createDocumentFragment();
-            var el1 = dom.createTextNode("			");
-            dom.appendChild(el0, el1);
-            var el1 = dom.createElement("div");
-            dom.setAttribute(el1,"class","jumbotron");
-            var el2 = dom.createTextNode("\n				");
-            dom.appendChild(el1, el2);
-            var el2 = dom.createElement("h1");
-            var el3 = dom.createTextNode("IASC 8470 Lab 2");
-            dom.appendChild(el2, el3);
-            dom.appendChild(el1, el2);
-            var el2 = dom.createTextNode("\n				");
-            dom.appendChild(el1, el2);
-            var el2 = dom.createElement("p");
-            var el3 = dom.createTextNode("Flickr search app created by David Nelson");
-            dom.appendChild(el2, el3);
-            dom.appendChild(el1, el2);
-            var el2 = dom.createTextNode("\n				");
-            dom.appendChild(el1, el2);
-            var el2 = dom.createElement("p");
-            var el3 = dom.createTextNode("Click one of the popular flickr tags below or search one above:");
-            dom.appendChild(el2, el3);
-            dom.appendChild(el1, el2);
-            var el2 = dom.createTextNode("\n");
-            dom.appendChild(el1, el2);
-            var el2 = dom.createComment("");
-            dom.appendChild(el1, el2);
-            var el2 = dom.createTextNode("			");
-            dom.appendChild(el1, el2);
-            dom.appendChild(el0, el1);
-            var el1 = dom.createTextNode("\n");
-            dom.appendChild(el0, el1);
-            return el0;
-          },
-          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-            var morphs = new Array(1);
-            morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),7,7);
-            return morphs;
-          },
-          statements: [
-            ["block","each",[["get","tagList",["loc",[null,[70,19],[70,26]]]]],[],0,null,["loc",[null,[70,4],[72,13]]]]
-          ],
-          locals: [],
-          templates: [child0]
-        };
-      }());
-      return {
-        meta: {
-          "revision": "Ember@1.13.12",
-          "loc": {
-            "source": null,
-            "start": {
-              "line": 62,
-              "column": 1
-            },
-            "end": {
-              "line": 75,
-              "column": 1
             }
           },
           "moduleName": "myproject/templates/application.hbs"
@@ -2251,10 +1796,95 @@ define('myproject/templates/application', ['exports'], function (exports) {
           return morphs;
         },
         statements: [
-          ["block","liquid-if",[["get","loading",["loc",[null,[63,15],[63,22]]]]],["use","toDown"],0,1,["loc",[null,[63,2],[74,16]]]]
+          ["block","bs-form",[],["formLayout","inline","class","search-form","action","search"],0,null,["loc",[null,[9,4],[17,16]]]]
         ],
         locals: [],
-        templates: [child0, child1]
+        templates: [child0]
+      };
+    }());
+    var child1 = (function() {
+      var child0 = (function() {
+        return {
+          meta: {
+            "revision": "Ember@1.13.12",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 20,
+                "column": 9
+              },
+              "end": {
+                "line": 20,
+                "column": 32
+              }
+            },
+            "moduleName": "myproject/templates/application.hbs"
+          },
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("Home");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes() { return []; },
+          statements: [
+
+          ],
+          locals: [],
+          templates: []
+        };
+      }());
+      return {
+        meta: {
+          "revision": "Ember@1.13.12",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 18,
+              "column": 3
+            },
+            "end": {
+              "line": 22,
+              "column": 3
+            }
+          },
+          "moduleName": "myproject/templates/application.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("				");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("ul");
+          dom.setAttribute(el1,"class","nav navbar-nav left-menu");
+          var el2 = dom.createTextNode("\n					");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createElement("li");
+          var el3 = dom.createComment("");
+          dom.appendChild(el2, el3);
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n				");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1, 1]),0,0);
+          return morphs;
+        },
+        statements: [
+          ["block","link-to",["home"],[],0,null,["loc",[null,[20,9],[20,44]]]]
+        ],
+        locals: [],
+        templates: [child0]
       };
     }());
     return {
@@ -2267,7 +1897,7 @@ define('myproject/templates/application', ['exports'], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 76,
+            "line": 30,
             "column": 6
           }
         },
@@ -2328,28 +1958,30 @@ define('myproject/templates/application', ['exports'], function (exports) {
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("div");
         dom.setAttribute(el1,"class","container");
-        var el2 = dom.createTextNode("\n");
+        var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
         var el2 = dom.createComment("");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n");
         dom.appendChild(el1, el2);
         dom.appendChild(el0, el1);
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var element10 = dom.childAt(fragment, [2, 1, 3]);
+        var element0 = dom.childAt(fragment, [2, 1, 3]);
         var morphs = new Array(3);
-        morphs[0] = dom.createMorphAt(element10,1,1);
-        morphs[1] = dom.createMorphAt(element10,3,3);
+        morphs[0] = dom.createMorphAt(element0,1,1);
+        morphs[1] = dom.createMorphAt(element0,3,3);
         morphs[2] = dom.createMorphAt(dom.childAt(fragment, [4]),1,1);
         return morphs;
       },
       statements: [
-        ["block","bs-form",[],["formLayout","inline","class","search-form","action","search"],0,null,["loc",[null,[8,3],[16,15]]]],
-        ["inline","auth-manager",[],["class","auth-mgr","userid",["subexpr","@mut",[["get","userid",["loc",[null,[17,42],[17,48]]]]],[],[]]],["loc",[null,[17,3],[17,50]]]],
-        ["block","liquid-if",[["get","filteredPhotosLoaded",["loc",[null,[23,14],[23,34]]]]],["use","toDown"],1,2,["loc",[null,[23,1],[75,15]]]]
+        ["block","if",[["get","isHome",["loc",[null,[8,9],[8,15]]]]],[],0,1,["loc",[null,[8,3],[22,10]]]],
+        ["inline","auth-manager",[],["class","auth-mgr","userid",["subexpr","@mut",[["get","userid",["loc",[null,[23,42],[23,48]]]]],[],[]]],["loc",[null,[23,3],[23,50]]]],
+        ["content","outlet",["loc",[null,[29,1],[29,11]]]]
       ],
       locals: [],
-      templates: [child0, child1, child2]
+      templates: [child0, child1]
     };
   }()));
 
@@ -2360,6 +1992,46 @@ define('myproject/templates/components/auth-manager', ['exports'], function (exp
 
   exports['default'] = Ember.HTMLBars.template((function() {
     var child0 = (function() {
+      var child0 = (function() {
+        return {
+          meta: {
+            "revision": "Ember@1.13.12",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 3,
+                "column": 8
+              },
+              "end": {
+                "line": 3,
+                "column": 49
+              }
+            },
+            "moduleName": "myproject/templates/components/auth-manager.hbs"
+          },
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createComment("");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var morphs = new Array(1);
+            morphs[0] = dom.createMorphAt(fragment,0,0,contextualElement);
+            dom.insertBoundary(fragment, 0);
+            dom.insertBoundary(fragment, null);
+            return morphs;
+          },
+          statements: [
+            ["content","username",["loc",[null,[3,37],[3,49]]]]
+          ],
+          locals: [],
+          templates: []
+        };
+      }());
       return {
         meta: {
           "revision": "Ember@1.13.12",
@@ -2415,11 +2087,11 @@ define('myproject/templates/components/auth-manager', ['exports'], function (exp
           return morphs;
         },
         statements: [
-          ["content","username",["loc",[null,[3,8],[3,20]]]],
+          ["block","link-to",["profile",["get","userid",["loc",[null,[3,29],[3,35]]]]],[],0,null,["loc",[null,[3,8],[3,61]]]],
           ["element","action",["logout"],[],["loc",[null,[4,48],[4,67]]]]
         ],
         locals: [],
-        templates: []
+        templates: [child0]
       };
     }());
     var child1 = (function() {
@@ -6696,6 +6368,83 @@ define('myproject/templates/components/form-element/vertical/textarea', ['export
   }()));
 
 });
+define('myproject/templates/components/like-item', ['exports'], function (exports) {
+
+  'use strict';
+
+  exports['default'] = Ember.HTMLBars.template((function() {
+    return {
+      meta: {
+        "revision": "Ember@1.13.12",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 8,
+            "column": 5
+          }
+        },
+        "moduleName": "myproject/templates/components/like-item.hbs"
+      },
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createElement("li");
+        dom.setAttribute(el1,"class","list-group-item");
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2,"class","media");
+        var el3 = dom.createTextNode("\n		");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("h4");
+        dom.setAttribute(el3,"class","media-heading");
+        var el4 = dom.createComment("");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n		");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("div");
+        dom.setAttribute(el3,"class","media-body");
+        var el4 = dom.createTextNode("\n			");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createElement("img");
+        dom.setAttribute(el4,"class","media-object profile-feed-img");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("\n		");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n	");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n");
+        dom.appendChild(el1, el2);
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var element0 = dom.childAt(fragment, [0, 1]);
+        var element1 = dom.childAt(element0, [3, 1]);
+        var morphs = new Array(2);
+        morphs[0] = dom.createMorphAt(dom.childAt(element0, [1]),0,0);
+        morphs[1] = dom.createAttrMorph(element1, 'src');
+        return morphs;
+      },
+      statements: [
+        ["content","like.title",["loc",[null,[3,28],[3,42]]]],
+        ["attribute","src",["concat",[["get","url",["loc",[null,[5,15],[5,18]]]]]]]
+      ],
+      locals: [],
+      templates: []
+    };
+  }()));
+
+});
 define('myproject/templates/components/liquid-bind', ['exports'], function (exports) {
 
   'use strict';
@@ -8289,6 +8038,699 @@ define('myproject/templates/components/liquid-with', ['exports'], function (expo
   }()));
 
 });
+define('myproject/templates/home', ['exports'], function (exports) {
+
+  'use strict';
+
+  exports['default'] = Ember.HTMLBars.template((function() {
+    var child0 = (function() {
+      var child0 = (function() {
+        var child0 = (function() {
+          return {
+            meta: {
+              "revision": "Ember@1.13.12",
+              "loc": {
+                "source": null,
+                "start": {
+                  "line": 14,
+                  "column": 5
+                },
+                "end": {
+                  "line": 18,
+                  "column": 5
+                }
+              },
+              "moduleName": "myproject/templates/home.hbs"
+            },
+            arity: 0,
+            cachedFragment: null,
+            hasRendered: false,
+            buildFragment: function buildFragment(dom) {
+              var el0 = dom.createDocumentFragment();
+              var el1 = dom.createTextNode("						");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createElement("button");
+              dom.setAttribute(el1,"class","btn btn-warning btn-xs pull-right");
+              dom.setAttribute(el1,"disabled","disabled");
+              var el2 = dom.createTextNode("\n							");
+              dom.appendChild(el1, el2);
+              var el2 = dom.createElement("span");
+              dom.setAttribute(el2,"class","glyphicon glyphicon-thumbs-up");
+              dom.appendChild(el1, el2);
+              var el2 = dom.createTextNode(" Like\n						");
+              dom.appendChild(el1, el2);
+              dom.appendChild(el0, el1);
+              var el1 = dom.createTextNode("\n");
+              dom.appendChild(el0, el1);
+              return el0;
+            },
+            buildRenderNodes: function buildRenderNodes() { return []; },
+            statements: [
+
+            ],
+            locals: [],
+            templates: []
+          };
+        }());
+        var child1 = (function() {
+          return {
+            meta: {
+              "revision": "Ember@1.13.12",
+              "loc": {
+                "source": null,
+                "start": {
+                  "line": 18,
+                  "column": 5
+                },
+                "end": {
+                  "line": 22,
+                  "column": 5
+                }
+              },
+              "moduleName": "myproject/templates/home.hbs"
+            },
+            arity: 0,
+            cachedFragment: null,
+            hasRendered: false,
+            buildFragment: function buildFragment(dom) {
+              var el0 = dom.createDocumentFragment();
+              var el1 = dom.createTextNode("						");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createElement("button");
+              dom.setAttribute(el1,"class","btn btn-default btn-xs pull-right");
+              var el2 = dom.createTextNode("\n							");
+              dom.appendChild(el1, el2);
+              var el2 = dom.createElement("span");
+              dom.setAttribute(el2,"class","glyphicon glyphicon-thumbs-up");
+              dom.appendChild(el1, el2);
+              var el2 = dom.createTextNode(" Like\n						");
+              dom.appendChild(el1, el2);
+              dom.appendChild(el0, el1);
+              var el1 = dom.createTextNode("\n");
+              dom.appendChild(el0, el1);
+              return el0;
+            },
+            buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+              var element2 = dom.childAt(fragment, [1]);
+              var morphs = new Array(1);
+              morphs[0] = dom.createElementMorph(element2);
+              return morphs;
+            },
+            statements: [
+              ["element","action",["like",["get","photo",["loc",[null,[19,72],[19,77]]]]],[],["loc",[null,[19,56],[19,79]]]]
+            ],
+            locals: [],
+            templates: []
+          };
+        }());
+        var child2 = (function() {
+          return {
+            meta: {
+              "revision": "Ember@1.13.12",
+              "loc": {
+                "source": null,
+                "start": {
+                  "line": 31,
+                  "column": 5
+                },
+                "end": {
+                  "line": 33,
+                  "column": 5
+                }
+              },
+              "moduleName": "myproject/templates/home.hbs"
+            },
+            arity: 1,
+            cachedFragment: null,
+            hasRendered: false,
+            buildFragment: function buildFragment(dom) {
+              var el0 = dom.createDocumentFragment();
+              var el1 = dom.createTextNode("						");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createElement("button");
+              dom.setAttribute(el1,"class","btn btn-info btn-xs post-tag-button");
+              var el2 = dom.createTextNode("#");
+              dom.appendChild(el1, el2);
+              var el2 = dom.createComment("");
+              dom.appendChild(el1, el2);
+              dom.appendChild(el0, el1);
+              var el1 = dom.createTextNode("\n");
+              dom.appendChild(el0, el1);
+              return el0;
+            },
+            buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+              var element1 = dom.childAt(fragment, [1]);
+              var morphs = new Array(2);
+              morphs[0] = dom.createElementMorph(element1);
+              morphs[1] = dom.createMorphAt(element1,1,1);
+              return morphs;
+            },
+            statements: [
+              ["element","action",["clicktag",["get","tag",["loc",[null,[32,78],[32,81]]]]],[],["loc",[null,[32,58],[32,83]]]],
+              ["content","tag",["loc",[null,[32,85],[32,92]]]]
+            ],
+            locals: ["tag"],
+            templates: []
+          };
+        }());
+        return {
+          meta: {
+            "revision": "Ember@1.13.12",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 3,
+                "column": 2
+              },
+              "end": {
+                "line": 38,
+                "column": 2
+              }
+            },
+            "moduleName": "myproject/templates/home.hbs"
+          },
+          arity: 1,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("		");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createElement("li");
+            dom.setAttribute(el1,"class","list-group-item");
+            var el2 = dom.createTextNode("\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("div");
+            dom.setAttribute(el2,"class","media");
+            var el3 = dom.createTextNode("\n				");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createElement("div");
+            dom.setAttribute(el3,"class","media-left media-middle");
+            var el4 = dom.createTextNode("\n					");
+            dom.appendChild(el3, el4);
+            var el4 = dom.createComment("");
+            dom.appendChild(el3, el4);
+            var el4 = dom.createTextNode("\n					Taken: ");
+            dom.appendChild(el3, el4);
+            var el4 = dom.createElement("a");
+            var el5 = dom.createComment("");
+            dom.appendChild(el4, el5);
+            var el5 = dom.createElement("br");
+            dom.appendChild(el4, el5);
+            dom.appendChild(el3, el4);
+            var el4 = dom.createTextNode("\n					By: ");
+            dom.appendChild(el3, el4);
+            var el4 = dom.createElement("a");
+            dom.setAttribute(el4,"target","_blank");
+            var el5 = dom.createComment("");
+            dom.appendChild(el4, el5);
+            dom.appendChild(el3, el4);
+            var el4 = dom.createElement("br");
+            dom.appendChild(el3, el4);
+            var el4 = dom.createTextNode("\n				");
+            dom.appendChild(el3, el4);
+            dom.appendChild(el2, el3);
+            var el3 = dom.createTextNode("\n				");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createElement("div");
+            dom.setAttribute(el3,"class","media-body");
+            var el4 = dom.createTextNode("\n					");
+            dom.appendChild(el3, el4);
+            var el4 = dom.createElement("h4");
+            dom.setAttribute(el4,"class","media-heading");
+            var el5 = dom.createComment("");
+            dom.appendChild(el4, el5);
+            var el5 = dom.createTextNode(" (");
+            dom.appendChild(el4, el5);
+            var el5 = dom.createComment("");
+            dom.appendChild(el4, el5);
+            var el5 = dom.createTextNode(" Views)\n");
+            dom.appendChild(el4, el5);
+            var el5 = dom.createComment("");
+            dom.appendChild(el4, el5);
+            var el5 = dom.createTextNode("					");
+            dom.appendChild(el4, el5);
+            dom.appendChild(el3, el4);
+            var el4 = dom.createTextNode("\n					");
+            dom.appendChild(el3, el4);
+            var el4 = dom.createComment("");
+            dom.appendChild(el3, el4);
+            var el4 = dom.createTextNode("\n				");
+            dom.appendChild(el3, el4);
+            dom.appendChild(el2, el3);
+            var el3 = dom.createTextNode("\n			");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("br");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("div");
+            dom.setAttribute(el2,"class","row");
+            var el3 = dom.createTextNode("\n				");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createElement("div");
+            dom.setAttribute(el3,"class","col-md-1 col-xs-1 col-sm-1");
+            var el4 = dom.createTextNode("Tags:");
+            dom.appendChild(el3, el4);
+            dom.appendChild(el2, el3);
+            var el3 = dom.createTextNode("\n				");
+            dom.appendChild(el2, el3);
+            var el3 = dom.createElement("div");
+            dom.setAttribute(el3,"class","col-md-11 col-xs-11 col-sm-11");
+            var el4 = dom.createTextNode("\n");
+            dom.appendChild(el3, el4);
+            var el4 = dom.createComment("");
+            dom.appendChild(el3, el4);
+            var el4 = dom.createTextNode("				");
+            dom.appendChild(el3, el4);
+            dom.appendChild(el2, el3);
+            var el3 = dom.createTextNode("\n			");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n\n		");
+            dom.appendChild(el1, el2);
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var element3 = dom.childAt(fragment, [1]);
+            var element4 = dom.childAt(element3, [1]);
+            var element5 = dom.childAt(element4, [1]);
+            var element6 = dom.childAt(element5, [3]);
+            var element7 = dom.childAt(element5, [5]);
+            var element8 = dom.childAt(element4, [3]);
+            var element9 = dom.childAt(element8, [1]);
+            var morphs = new Array(10);
+            morphs[0] = dom.createMorphAt(element5,1,1);
+            morphs[1] = dom.createAttrMorph(element6, 'href');
+            morphs[2] = dom.createMorphAt(element6,0,0);
+            morphs[3] = dom.createAttrMorph(element7, 'href');
+            morphs[4] = dom.createMorphAt(element7,0,0);
+            morphs[5] = dom.createMorphAt(element9,0,0);
+            morphs[6] = dom.createMorphAt(element9,2,2);
+            morphs[7] = dom.createMorphAt(element9,4,4);
+            morphs[8] = dom.createUnsafeMorphAt(element8,3,3);
+            morphs[9] = dom.createMorphAt(dom.childAt(element3, [5, 3]),1,1);
+            return morphs;
+          },
+          statements: [
+            ["inline","light-box",[],["href",["subexpr","@mut",[["get","photo.url",["loc",[null,[7,22],[7,31]]]]],[],[]],"data-lightbox",["subexpr","@mut",[["get","photo.id",["loc",[null,[7,46],[7,54]]]]],[],[]],"data-title",["subexpr","@mut",[["get","photo.title",["loc",[null,[7,66],[7,77]]]]],[],[]],"data-class","media-object feed-img"],["loc",[null,[7,5],[8,42]]]],
+            ["attribute","href",["get","photo.link",["loc",[null,[9,22],[9,32]]]]],
+            ["content","photo.humanReadableDate",["loc",[null,[9,35],[9,62]]]],
+            ["attribute","href",["get","photo.ownerurl",["loc",[null,[10,19],[10,33]]]]],
+            ["content","photo.owner.username",["loc",[null,[10,52],[10,76]]]],
+            ["content","photo.title",["loc",[null,[13,31],[13,46]]]],
+            ["content","photo.views",["loc",[null,[13,48],[13,63]]]],
+            ["block","if",[["get","photo.liked",["loc",[null,[14,11],[14,22]]]]],[],0,1,["loc",[null,[14,5],[22,12]]]],
+            ["content","photo.description",["loc",[null,[24,5],[24,28]]]],
+            ["block","each",[["get","photo.tags",["loc",[null,[31,20],[31,30]]]]],[],2,null,["loc",[null,[31,5],[33,14]]]]
+          ],
+          locals: ["photo"],
+          templates: [child0, child1, child2]
+        };
+      }());
+      return {
+        meta: {
+          "revision": "Ember@1.13.12",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 1,
+              "column": 0
+            },
+            "end": {
+              "line": 40,
+              "column": 0
+            }
+          },
+          "moduleName": "myproject/templates/home.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("	");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("ul");
+          dom.setAttribute(el1,"class","list-group");
+          var el2 = dom.createTextNode("\n");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("	");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),1,1);
+          return morphs;
+        },
+        statements: [
+          ["block","each",[["get","filteredPhotos",["loc",[null,[3,19],[3,33]]]]],[],0,null,["loc",[null,[3,2],[38,11]]]]
+        ],
+        locals: [],
+        templates: [child0]
+      };
+    }());
+    var child1 = (function() {
+      var child0 = (function() {
+        return {
+          meta: {
+            "revision": "Ember@1.13.12",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 41,
+                "column": 1
+              },
+              "end": {
+                "line": 43,
+                "column": 1
+              }
+            },
+            "moduleName": "myproject/templates/home.hbs"
+          },
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("		");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createElement("img");
+            dom.setAttribute(el1,"src","/static/ember/assets/images/lightbox/loading.gif");
+            dom.setAttribute(el1,"class","img-responsive center-block");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes() { return []; },
+          statements: [
+
+          ],
+          locals: [],
+          templates: []
+        };
+      }());
+      var child1 = (function() {
+        var child0 = (function() {
+          return {
+            meta: {
+              "revision": "Ember@1.13.12",
+              "loc": {
+                "source": null,
+                "start": {
+                  "line": 48,
+                  "column": 3
+                },
+                "end": {
+                  "line": 50,
+                  "column": 3
+                }
+              },
+              "moduleName": "myproject/templates/home.hbs"
+            },
+            arity: 1,
+            cachedFragment: null,
+            hasRendered: false,
+            buildFragment: function buildFragment(dom) {
+              var el0 = dom.createDocumentFragment();
+              var el1 = dom.createTextNode("				");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createElement("button");
+              dom.setAttribute(el1,"class","btn btn-info btn-small tag-button");
+              var el2 = dom.createTextNode("#");
+              dom.appendChild(el1, el2);
+              var el2 = dom.createComment("");
+              dom.appendChild(el1, el2);
+              dom.appendChild(el0, el1);
+              var el1 = dom.createTextNode("\n");
+              dom.appendChild(el0, el1);
+              return el0;
+            },
+            buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+              var element0 = dom.childAt(fragment, [1]);
+              var morphs = new Array(2);
+              morphs[0] = dom.createElementMorph(element0);
+              morphs[1] = dom.createMorphAt(element0,1,1);
+              return morphs;
+            },
+            statements: [
+              ["element","action",["clicktag",["get","tag",["loc",[null,[49,74],[49,77]]]]],[],["loc",[null,[49,54],[49,79]]]],
+              ["content","tag",["loc",[null,[49,81],[49,88]]]]
+            ],
+            locals: ["tag"],
+            templates: []
+          };
+        }());
+        return {
+          meta: {
+            "revision": "Ember@1.13.12",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 43,
+                "column": 1
+              },
+              "end": {
+                "line": 52,
+                "column": 1
+              }
+            },
+            "moduleName": "myproject/templates/home.hbs"
+          },
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("		");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createElement("div");
+            dom.setAttribute(el1,"class","jumbotron");
+            var el2 = dom.createTextNode("\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("h1");
+            var el3 = dom.createTextNode("IASC 8470 Lab 2");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("p");
+            var el3 = dom.createTextNode("Flickr search app created by David Nelson");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n			");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("p");
+            var el3 = dom.createTextNode("Click one of the popular flickr tags below or search one above:");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createComment("");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("		");
+            dom.appendChild(el1, el2);
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var morphs = new Array(1);
+            morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),7,7);
+            return morphs;
+          },
+          statements: [
+            ["block","each",[["get","tagList",["loc",[null,[48,18],[48,25]]]]],[],0,null,["loc",[null,[48,3],[50,12]]]]
+          ],
+          locals: [],
+          templates: [child0]
+        };
+      }());
+      return {
+        meta: {
+          "revision": "Ember@1.13.12",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 40,
+              "column": 0
+            },
+            "end": {
+              "line": 53,
+              "column": 0
+            }
+          },
+          "moduleName": "myproject/templates/home.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createComment("");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(fragment,0,0,contextualElement);
+          dom.insertBoundary(fragment, 0);
+          dom.insertBoundary(fragment, null);
+          return morphs;
+        },
+        statements: [
+          ["block","liquid-if",[["get","loading",["loc",[null,[41,14],[41,21]]]]],["use","toDown"],0,1,["loc",[null,[41,1],[52,15]]]]
+        ],
+        locals: [],
+        templates: [child0, child1]
+      };
+    }());
+    return {
+      meta: {
+        "revision": "Ember@1.13.12",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 53,
+            "column": 14
+          }
+        },
+        "moduleName": "myproject/templates/home.hbs"
+      },
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var morphs = new Array(1);
+        morphs[0] = dom.createMorphAt(fragment,0,0,contextualElement);
+        dom.insertBoundary(fragment, 0);
+        dom.insertBoundary(fragment, null);
+        return morphs;
+      },
+      statements: [
+        ["block","liquid-if",[["get","filteredPhotosLoaded",["loc",[null,[1,13],[1,33]]]]],["use","toDown"],0,1,["loc",[null,[1,0],[53,14]]]]
+      ],
+      locals: [],
+      templates: [child0, child1]
+    };
+  }()));
+
+});
+define('myproject/templates/profile', ['exports'], function (exports) {
+
+  'use strict';
+
+  exports['default'] = Ember.HTMLBars.template((function() {
+    var child0 = (function() {
+      return {
+        meta: {
+          "revision": "Ember@1.13.12",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 2,
+              "column": 1
+            },
+            "end": {
+              "line": 4,
+              "column": 1
+            }
+          },
+          "moduleName": "myproject/templates/profile.hbs"
+        },
+        arity: 1,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("		");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createComment("");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(fragment,1,1,contextualElement);
+          return morphs;
+        },
+        statements: [
+          ["inline","like-item",[],["like",["subexpr","@mut",[["get","like",["loc",[null,[3,19],[3,23]]]]],[],[]]],["loc",[null,[3,2],[3,25]]]]
+        ],
+        locals: ["like"],
+        templates: []
+      };
+    }());
+    return {
+      meta: {
+        "revision": "Ember@1.13.12",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 5,
+            "column": 5
+          }
+        },
+        "moduleName": "myproject/templates/profile.hbs"
+      },
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createElement("ul");
+        dom.setAttribute(el1,"class","list-group");
+        var el2 = dom.createTextNode("\n");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createComment("");
+        dom.appendChild(el1, el2);
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var morphs = new Array(1);
+        morphs[0] = dom.createMorphAt(dom.childAt(fragment, [0]),1,1);
+        return morphs;
+      },
+      statements: [
+        ["block","each",[["get","likes",["loc",[null,[2,17],[2,22]]]]],[],0,null,["loc",[null,[2,1],[4,10]]]]
+      ],
+      locals: [],
+      templates: [child0]
+    };
+  }()));
+
+});
 define('myproject/tests/app.jshint', function () {
 
   'use strict';
@@ -8309,6 +8751,16 @@ define('myproject/tests/components/auth-manager.jshint', function () {
   });
 
 });
+define('myproject/tests/components/like-item.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - components');
+  test('components/like-item.js should pass jshint', function() { 
+    ok(true, 'components/like-item.js should pass jshint.'); 
+  });
+
+});
 define('myproject/tests/controllers/application.jshint', function () {
 
   'use strict';
@@ -8316,6 +8768,26 @@ define('myproject/tests/controllers/application.jshint', function () {
   module('JSHint - controllers');
   test('controllers/application.js should pass jshint', function() { 
     ok(true, 'controllers/application.js should pass jshint.'); 
+  });
+
+});
+define('myproject/tests/controllers/home.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - controllers');
+  test('controllers/home.js should pass jshint', function() { 
+    ok(true, 'controllers/home.js should pass jshint.'); 
+  });
+
+});
+define('myproject/tests/controllers/profile.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - controllers');
+  test('controllers/profile.js should pass jshint', function() { 
+    ok(true, 'controllers/profile.js should pass jshint.'); 
   });
 
 });
@@ -8396,6 +8868,26 @@ define('myproject/tests/router.jshint', function () {
   });
 
 });
+define('myproject/tests/routes/home.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - routes');
+  test('routes/home.js should pass jshint', function() { 
+    ok(true, 'routes/home.js should pass jshint.'); 
+  });
+
+});
+define('myproject/tests/routes/profile.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - routes');
+  test('routes/profile.js should pass jshint', function() { 
+    ok(true, 'routes/profile.js should pass jshint.'); 
+  });
+
+});
 define('myproject/tests/test-helper', ['myproject/tests/helpers/resolver', 'ember-qunit'], function (resolver, ember_qunit) {
 
 	'use strict';
@@ -8456,6 +8948,39 @@ define('myproject/tests/unit/components/auth-manager-test.jshint', function () {
   });
 
 });
+define('myproject/tests/unit/components/like-item-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleForComponent('like-item', 'Unit | Component | like item', {
+    // Specify the other units that are required for this test
+    // needs: ['component:foo', 'helper:bar'],
+    unit: true
+  });
+
+  ember_qunit.test('it renders', function (assert) {
+    assert.expect(2);
+
+    // Creates the component instance
+    var component = this.subject();
+    assert.equal(component._state, 'preRender');
+
+    // Renders the component to the page
+    this.render();
+    assert.equal(component._state, 'inDOM');
+  });
+
+});
+define('myproject/tests/unit/components/like-item-test.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - unit/components');
+  test('unit/components/like-item-test.js should pass jshint', function() { 
+    ok(true, 'unit/components/like-item-test.js should pass jshint.'); 
+  });
+
+});
 define('myproject/tests/unit/controllers/application-test', ['ember-qunit'], function (ember_qunit) {
 
   'use strict';
@@ -8482,6 +9007,58 @@ define('myproject/tests/unit/controllers/application-test.jshint', function () {
   });
 
 });
+define('myproject/tests/unit/controllers/home-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleFor('controller:home', {
+    // Specify the other units that are required for this test.
+    // needs: ['controller:foo']
+  });
+
+  // Replace this with your real tests.
+  ember_qunit.test('it exists', function (assert) {
+    var controller = this.subject();
+    assert.ok(controller);
+  });
+
+});
+define('myproject/tests/unit/controllers/home-test.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - unit/controllers');
+  test('unit/controllers/home-test.js should pass jshint', function() { 
+    ok(true, 'unit/controllers/home-test.js should pass jshint.'); 
+  });
+
+});
+define('myproject/tests/unit/controllers/profile-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleFor('controller:profile', {
+    // Specify the other units that are required for this test.
+    // needs: ['controller:foo']
+  });
+
+  // Replace this with your real tests.
+  ember_qunit.test('it exists', function (assert) {
+    var controller = this.subject();
+    assert.ok(controller);
+  });
+
+});
+define('myproject/tests/unit/controllers/profile-test.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - unit/controllers');
+  test('unit/controllers/profile-test.js should pass jshint', function() { 
+    ok(true, 'unit/controllers/profile-test.js should pass jshint.'); 
+  });
+
+});
 define('myproject/tests/unit/models/photo-test', ['ember-qunit'], function (ember_qunit) {
 
   'use strict';
@@ -8505,6 +9082,56 @@ define('myproject/tests/unit/models/photo-test.jshint', function () {
   module('JSHint - unit/models');
   test('unit/models/photo-test.js should pass jshint', function() { 
     ok(true, 'unit/models/photo-test.js should pass jshint.'); 
+  });
+
+});
+define('myproject/tests/unit/routes/home-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleFor('route:home', 'Unit | Route | home', {
+    // Specify the other units that are required for this test.
+    // needs: ['controller:foo']
+  });
+
+  ember_qunit.test('it exists', function (assert) {
+    var route = this.subject();
+    assert.ok(route);
+  });
+
+});
+define('myproject/tests/unit/routes/home-test.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - unit/routes');
+  test('unit/routes/home-test.js should pass jshint', function() { 
+    ok(true, 'unit/routes/home-test.js should pass jshint.'); 
+  });
+
+});
+define('myproject/tests/unit/routes/profile-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleFor('route:profile', 'Unit | Route | profile', {
+    // Specify the other units that are required for this test.
+    // needs: ['controller:foo']
+  });
+
+  ember_qunit.test('it exists', function (assert) {
+    var route = this.subject();
+    assert.ok(route);
+  });
+
+});
+define('myproject/tests/unit/routes/profile-test.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - unit/routes');
+  test('unit/routes/profile-test.js should pass jshint', function() { 
+    ok(true, 'unit/routes/profile-test.js should pass jshint.'); 
   });
 
 });

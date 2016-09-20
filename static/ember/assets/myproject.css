@@ -10,6 +10,10 @@ body {
 	z-index: -1;
 }
 
+.left-menu {
+	margin-top: -8px;
+}
+
 .search-form {
 	float: left;
 }
@@ -43,4 +47,8 @@ body {
 .post-tag-button {
 	margin-top: 1px;
 	padding: 2px;
+}
+
+.profile-feed-img {
+	min-width: 100%;
 }
